@@ -1,0 +1,49 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson3
+
+subir a git local:
+
+$ git init
+$ git add .                          
+$ git status
+$ git commit -m  "laravelDesde0V00
+$ clear
+
+----------------------------------
+routes/web.php:
+
+
+Route::get('/', function () {
+   return 'Home';
+});
+
+Route::get('/usuarios', function () {
+    return 'Usuarios';
+});
+
+Route::get('/usuarios/nuevo', function () {
+    return 'Crear nuevo usuario';
+});
+
+Route::get('/usuarios/{id}', function ($id) {
+    return "Mostrando detalle del usuario: {$id}";
+});
+
+https://styde.net/rutas-con-filtros-en-laravel-5-1/
+
+Route::get('/usuarios/{id}', function ($id) {
+    return "Mostrando detalle del usuario: {$id}";
+})->where('id','[0-9]+');
+})->where(['id' => '[\d]+']); //solo numeros
+->where(['id' => '[-\w]+']); //solo 
+->where(['id' => 'create|delete|update']); //actividades que puede crear
+
+Route::get('/saludo/{name}/{nickname?}', function ($name, $nickname = null) {
+    if ($nickname) {
+        return "Bienvenido {$name}, tu apodo es {$nickname}";
+    } else {
+        return "Bienvenido {$name}, no tienes apodo";
+    }
+});
+
+
+

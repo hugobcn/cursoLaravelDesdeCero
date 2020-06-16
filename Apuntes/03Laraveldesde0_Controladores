@@ -1,0 +1,71 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson5
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+
+-----test-----
+https://www.laraveltip.com/haciendo-pruebas-automatizadas-en-laravel/
+https://laravel.com/docs/7.x/testing
+alias t=vendor/bin/phpunit
+/** @test */
+
+----git----
+
+subir a git local:
+
+$ git init
+$ git add .                          
+$ git status
+$ git commit -m  "laravelDesde0V00"
+
+git push https://github.com/user/example master:master
+git push --mirror https://github.com/my_username/my_repo.git
+git push -u origin master 
+make git m="your message"
+$ clear
+
+bajar git clone --bare https://git.fedorahosted.org/the/path/to/my_repo.git
+----logs----
+
+/storage/logs/laravel.logs
+
+----------------------------------
+
+----------------CONTROLADORES-------------------
+
+php artisan make:controller UserController
+
+Route::get('/usuarios/{id}', 'UserController@show')
+    ->where('id', '[0-9]+');
+
+public function show($id)
+    {
+        return "Mostrando detalle del usuario: {$id}";
+    }
+
+-----------------
+
+Route::get('/saludo/{name}/{nickname?}', 'WelcomeUserController');
+
+
+public function __invoke($name, $nickname = null)
+    {
+        $name = ucfirst($name);
+
+        if ($nickname) {
+            return "Bienvenido {$name}, tu apodo es {$nickname}";
+        } else {
+            return "Bienvenido {$name}";
+        }
+    }
+
+-------
+
+Controlador que solo tenga una accion, __invoke
+
+public function __invoke(){
+
+
+}
+
+
+
+

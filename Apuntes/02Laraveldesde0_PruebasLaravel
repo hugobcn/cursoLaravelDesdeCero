@@ -1,0 +1,56 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson4
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+
+-----test-----
+https://www.laraveltip.com/haciendo-pruebas-automatizadas-en-laravel/
+https://laravel.com/docs/7.x/testing
+alias t=vendor/bin/phpunit
+/** @test */
+https://laravel.com/docs/7.x/http-tests#response-assertions
+
+crearPruebas:
+
+php artisan make:test UsersModuleTest
+
+
+ /** @test */
+    function test_it_loads_the_users_list_page()
+    {
+        $this->get('/usuarios')
+                ->assertStatus(200)
+           ->assertSee('Usuarios');
+    }
+
+/** @test */
+    function test_it_loads_the_users_details_page()
+    {
+        $this->get('/usuarios/5')
+                ->assertStatus(200)
+           ->assertSee("Mostrando detalle del usuario: 5");
+           //"Mostrando detalle del usuario: {$id}"
+    }
+
+
+----git----
+
+subir a git local:
+
+$ git init
+$ git add .                          
+$ git status
+$ git commit -m  "laravelDesde0V00"
+
+git push https://github.com/user/example master:master
+git push --mirror https://github.com/my_username/my_repo.git
+git push -u origin master 
+make git m="your message"
+$ clear
+
+
+
+bajar git clone --bare https://git.fedorahosted.org/the/path/to/my_repo.git
+----------------------------------
+
+
+
+

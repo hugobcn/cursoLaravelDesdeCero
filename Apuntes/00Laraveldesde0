@@ -1,0 +1,10 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero
+
+subir a git local:
+
+$ git init
+$ git add .                          
+$ git status
+$ git commit -m  "laravelDesde0V00
+$ clear
+
