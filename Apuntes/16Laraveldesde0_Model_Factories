@@ -1,0 +1,137 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson18
+https://github.com/fzaninotto/Faker
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+---------env-------
+
+DB_DATABASE=laravelDesde0
+DB_USERNAME=admin
+DB_PASSWORD=admin
+
+---- Providers/AppServiceProvider-------
+use Illuminate\Support\Facades\Schema;
+
+public function boot()
+{
+    Schema::defaultStringLength(191);
+}
+
+php artisan migrate
+
+----------------------MODEL FACTORY---------------------------
+
+Los Model Factories nos permiten crear registros de prueba, ya sea para cargar 
+nuestra base de datos con «información falsa» o «información de prueba» o para 
+crear las condiciones necesarias para ejecutar pruebas automatizadas. 
+
+php artisan make:factory ProfessionFactory
+
+php artisan make:factory ProfessionFactory --model=Profession
+
+Al generar un modelo con el comando make:model también podemos generar un Model 
+Factory y/o una migración pasando las opciones -f y/o -m por ejemplo
+
+php artisan make:model Skill -mf 
+
+
+----------------Tinker---------------
+
+$faker->name;  // 'Jazmyne Romaguera'
+$faker->text   // Dolores sit sint laboriosam dolorem culpa et autem. Beatae nam sunt fugit
+
+$faker->cellphone;
+// 9432-5656
+
+-----------Utilizar un Model Factory-----------
+php artisan tinker
+
+
+Use App\User;
+factory(User::class())->create();
+
+
+App\User {
+    name: "Jazmyne Romaguera",
+    email: "ciara.willms@example.com",
+    updated_at: "2017-11-24 15:55:32",
+    created_at: "2017-11-24 15:55:32",
+    id: 4,
+}
+
+Para cargar un determinado número de registros pasamos como segundo argumento 
+la cantidad que queremos crear
+
+factory(User::class, 48)->create
+factory(User::class)->times(48)->create();
+
+-----UserSeeder.php-----
+
+Creara campos fictticios y nombre, email,.... y cogera el valor de los 
+profesiones_id que escogi:
+
+$professionId = Profession::where('title','Desarollo back-end')->value('id');
+
+factory(User::class)->create([
+    'profession_id' => $professionId
+]);
+
+factory(User::class)->create([
+            'name' => 'Duilio Palacios',
+            'email' => 'duilio@styde.net',
+            'password' => bcrypt('laravel'),
+            'profession_id' => $professionId
+        ]);
+
+Crear todos los valores aleatorios:
+
+factory(User::class)->create();
+factory(User::class, 48)->create
+factory(User::class)->times(48)->create();
+
+-----Factory Professional-----
+
+php artisan make:Factory ProfessionFactory:
+
+use Faker\Generator as Faker;
+
+$factory->define(App\Profession::class, function (Faker $faker) {
+    return [
+        //'title' => $faker->sentence(3, false)  3 palabras
+       'title' => $faker->sentence
+    ];
+});
+
+--------DUDAS DIGUS--------
+
+factory(Profession::class,3)->create()->each(function($profession){
+$profession->users()->create(
+factory(User::class)->raw());
+});
+
+
+
+ $factory->define(BuenasNuevas\User::class, function (Faker $faker) {
+
+$kinds = ['administrator', 'operator', 'guest'];
+$gender = $faker->randomElements(['male', 'female'])[0];
+$professions_amount = Profession::count();
+
+$factory->define(App\Profession::class, function (Faker $faker) {
+
+return [
+'name' => $faker->jobTitle
+];
+
+});
+
+Más tarde en UserFactory puedes hacer esto:
+
+$factory->define(BuenasNuevas\User::class, function (Faker $faker) {
+
+$kinds = ['administrator', 'operator', 'guest'];
+$gender = $faker->randomElements(['male', 'female'])[0];
+$professions_amount = Profession::count();
+
+'profession_id' => Profession::inRandomOrder()->value('id') ?: factory(Profession::class)

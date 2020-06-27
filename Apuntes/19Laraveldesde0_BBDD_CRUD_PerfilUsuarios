@@ -1,0 +1,57 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson22
+https://styde.net/motores-de-almacenamiento-en-dbms-derivados-de-mysql/
+https://github.com/fzaninotto/Faker
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+-----REFERSHDATABASE------
+
+https://laravel.com/api/6.x/Illuminate/Foundation/Testing/RefreshDatabase.html
+https://dev.to/daniel_werner/under-the-hood-how-refreshdatabase-works-in-laravel-tests-2728
+https://42coders.com/under-the-hood-how-refreshdatabase-works-in-laravel-tests/
+
+Con  use RefreshDataBase; no cal poner DB::table('users')->truncate(); 
+en otros metodos para eliminar datos.
+
+$this->artisan('migrate');
+---------env-------
+
+DB_DATABASE=laravelDesde0
+DB_USERNAME=admin
+DB_PASSWORD=admin
+
+---- Providers/AppServiceProvider-------
+use Illuminate\Support\Facades\Schema;
+https://laravel.com/docs/7.x/dusk#migrations
+----------------------------------
+
+public function boot()
+{
+    Schema::defaultStringLength(191);
+}
+
+php artisan migrate
+
+---------------------CRUD-----------------
+
+$user = User::find(1);
+
+$users = User::find([1, 2, 3]);
+
+----CAMBIAR PROFRSION_ID-----
+
+ Cambiar 'profession_id' => rand(1, 10) reeemplzarlo  
+'profession_id' => factory(App\Profession::class).
+
+$user = factory(User::class)
+->create([
+'name' => 'Miguel ANGEL',
+'profession_id' => factory(Profession::class)->create()->id,
+]);
+
+--------------------------------------------
+
+

@@ -1,0 +1,54 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson7
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+
+-------------------------------------------------------
+
+users.blade.php  :
+----------------------------
+<body>
+    <h1>{{ $title }}</h1>
+
+    <hr>
+
+    <ul>
+        @empty(users) xxx @else xxxx @endempty
+@forelse ($users as $user) xxxx @empty <li>mensaje si hay error</li> @endforelse
+        {{-- @unless(empty($users))  sino inverso @if --}}
+        @forelse ($users as $user)
+            <li>{{ $user }}</li>
+        @empty
+            <li>No hay usuarios registrados.</li>
+        @endforelse
+    </ul>
+</body>
+
+
+--controllers:
+
+ request('field');
+
+        if (request()->has('empty')) {
+            $users = [];
+        } else {
+            $users = [
+                'Joel', 'Ellie', 'Tess', 'Tommy', 'Bill',
+            ];
+        }
+
+        $title = 'Listado de usuarios';
+
+        return view('users', compact('title', 'users'));
+
+
+-------TEST---------------
+
+/** @test */
+    function it_shows_a_default_message_if_the_users_list_is_empty()
+    {
+        $this->get('/usuarios?empty')
+            ->assertStatus(200)
+            ->assertSee('No hay usuarios registrados.');
+    }

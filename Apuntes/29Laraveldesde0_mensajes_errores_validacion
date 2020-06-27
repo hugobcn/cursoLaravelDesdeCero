@@ -1,0 +1,80 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson30
+https://laravel.com/docs/7.x/urls
+https://laravel.com/docs/7.x/validation
+https://laravel.com/docs/7.x/validation#working-with-error-messages
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+
+-----MOSTRAR ERRORES MENSAJES----
+
+mensajes de validación en las vistas utilizamos la variable 
+$errors(Illuminate\Support\MessageBag):
+
+@if ($errors->any())
+    <p>Hay errores!</p>
+@endif
+
+<ul>
+    @foreach ($errors->all() as $error)
+        <li>{{ $error }}</li>
+    @endforeach
+</ul>
+
+<ul>
+    @foreach ($errors->get('email') as $error)
+        <li>{{ $error }}</li>
+    @endforeach
+</ul>
+
+<p>{{ $errors->first('email') }}</p
+
+@if ($errors->has('name'))
+            <p>{{ $errors->first('name') }}</p>
+        @endif
+
+mensaje validación para un campo utilizamos el método has.
+el método first() junto con el método has().
+
+@if ($errors->has('email'))
+    <p>{{ $errors->first('email') }}</p>
+@endif
+
+Conservar el valor de un campo
+
+errores de validación y el usuario sea enviado de vuelta al formulario el valor erroneo, 
+podemos utilizar la función helper old(). value="{{ old('email') }}"
+
+<input type="email" name="email" id="email" placeholder="pedro@example.com" value="{{ old('email') }}">
+
+-------------------------------
+
+
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <h6>Por favor corrige los errores debajo:</h6>
+        {{--<ul>--}}
+            {{--@foreach ($errors->all() as $error)--}}
+                {{--<li>{{ $error }}</li>--}}
+            {{--@endforeach--}}
+        {{--</ul>--}}
+    </div>
+    @endif
+
+
+
+Since you often will want to flash input in association with a redirect to the 
+previous page, you may easily chain input flashing onto a redirect.
+<input ... value ="{{old('email')}}"
+
+return Redirect::to('form')->withInput();
+
+return Redirect::to('form')->withInput(Input::except('password'));
+
+UsuarioController/metodo store{
+
+ return redirect('usuarios/nuevo')->withInput();
+

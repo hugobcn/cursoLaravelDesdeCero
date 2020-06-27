@@ -1,0 +1,205 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson12
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+---------env-------
+
+DB_DATABASE=laravelDesde0
+DB_USERNAME=admin
+DB_PASSWORD=admin
+
+---- Providers/AppServiceProvider-------
+use Illuminate\Support\Facades\Schema;
+
+public function boot()
+{
+    Schema::defaultStringLength(191);
+}
+
+php artisan migrate
+
+-------deletes registros desde seed-------------
+
+https://laravel.com/docs/7.x/queries#
+
+Deletes
+
+The query builder may also be used to delete records from the table via the delete method. You may constrain delete statements by adding where clauses before calling the delete method:
+
+DB::table('users')->delete();
+
+DB::table('users')->where('votes', '>', 100)->delete();
+
+If you wish to truncate the entire table, which will remove all rows and reset the auto-incrementing ID to zero, you may use the truncate method:
+
+DB::table('users')->truncate();
+
+--------------------php artisan seeder y crearlos---------------------------
+
+php artisan make:seeder 
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class ProfessionSeeder extends Seeder
+{
+    public function run()
+    { 
+
+         /*
+        cuando se hacen php artisan migrate:fresh --seed
+        desconectar claves foraneas, pra activarlas otra vez = 1
+        */
+        //DB::statement('SET FOREIGN_KEY_CHECKS = 0');
+        /*
+        cuando se hacen php artisan migrate:fresh --seed
+        es necesario ->truncate();        
+        */
+        //DB::table('professions')->truncate();        
+
+        DB::table('professions')->insert([
+            'title' => 'Desarrollador back-end',
+        ]);
+
+        DB::table('professions')->insert([
+            'title' => 'Desarrollador front-end',
+        ]);
+
+        DB::table('professions')->insert([
+            'title' => 'Diseñador web',
+        ]);
+    }
+
+---------------------------------------
+<?php
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class UserSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        DB::table('users')->insert([
+            'name' => 'Duilio Palacios',
+            'email' => 'duilio@styde.net',
+            'password' => bcrypt('laravel'),
+        ]);
+    }
+}
+
+
+Database/Migrations/create_professions_table ->  $table->string('title', 100)->unique();
+No repetir nombres, nombre unicos
+
+------------------------------
+
+class DatabaseSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $this->truncateTables([
+            'users',
+            'professions'
+        ]);
+
+        // $this->call(UsersTableSeeder::class);
+        $this->call(ProfessionSeeder::class);
+        $this->call(UserSeeder::class);
+    }
+
+    protected function truncateTables(array $tables)
+    {
+        DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
+
+        foreach ($tables as $table) {
+            DB::table($table)->truncate();
+        }
+
+        DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
+    }
+}
+
+
+-------------------------------------------------
+
+---------------ejecutar seeder-------
+
+php artisan db:seed
+
+php artisan db:seed --class=ProfessionSeeder
+
+php artisan migrate:fresh --seed  (rectificar errores de tabla y sus registros)
+
+------------------Desactivar revisión de claves foráneas----------------------
+
+class ProfessionSeeder extends Seeder
+{
+    public function run()
+    {
+        DB::statement('SET FOREIGN_KEY_CHECKS = 0;'); // Desactivamos la revisión de claves foráneas
+        DB::table('professions')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS = 1;'); // Reactivamos la revisión de claves foráneas
+ 
+        // ..
+    }
+}
+
+--------vaciar varias tablas a la vez----------------------
+
+use Illuminate\Database\Seeder;
+
+//vaciar varias tablas a la vez, puedes utilizar el siguiente código dentro 
+de la clase DatabaseSeeder:
+
+
+
+class DatabaseSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $this->truncateTables([
+            'users',
+            'professions'
+        ]);
+
+        // $this->call(UsersTableSeeder::class);
+        $this->call(ProfessionSeeder::class);
+        $this->call(UserSeeder::class);
+    }
+
+
+    protected function truncateTables(array $tables)
+    {
+        DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
+
+        foreach ($tables as $table) {
+            DB::table($table)->truncate();
+        }
+
+        DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
+    }
+}
+
+encyrptar contrsenya:
+
+DB::table('users')->insert([
+    // ..
+    'password' => bcrypt('laravel')
+]);

@@ -1,0 +1,80 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson37
+https://laravel.com/docs/7.x/urls
+https://laravel.com/docs/7.x/validation
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+
+-----enlance----
+
+oute::delete('/usuarios/{user}', 'UserController@destroy');
+ 
+
+Dentro de la prueba también utilizamos el método delete llamando a $this->delete:
+
+$this->delete("users/{$user->id}");
+ 
+Con assertDatabaseMissing comprobamos que el registro ya no existe en la base de datos. Como primer argumento pasamos el nombre de la tabla y como segundo el array de atributos que no esperamos encontrar. En este caso no esperamos encontrar el registro con el id pasado:
+
+$this->assertDatabaseMissing('users', [
+    'id' => $user->id
+]);
+ 
+
+También podemos utilizar assertSame, pasamos como primer argumento el valor esperado y como segundo argumento la cantidad de usuarios actual:
+
+
+$this->assertSame(0, User::count());
+ 
+
+Esperaríamos cero usuarios puesto que eliminamos el único usuario creado.
+
+Si estamos cargando el modelo con Route Model Binding podemos llamar al método delete para eliminar el registro directamente:
+
+function destroy(User $user) {
+    $user->delete();
+ 
+    return redirect()->route('users.index');
+}
+ 
+
+De lo contrario tendríamos que escribir algo como:
+
+$user = User::findOrFail($id);
+
+$user->delete();
+
+Recuerda que en lugar de escribir la URL puedes usar el nombre de la ruta para redirigir:
+
+return redirect()->route('users.index');
+
+--------------ejemplo
+
+ /** @test */
+    function it_deletes_a_user()
+    {
+        $this->withoutExceptionHandling();
+
+        $user = factory(User::class)->create();
+
+        $this->delete("usuarios/{$user->id}")
+            ->assertRedirect('usuarios');
+
+        $this->assertDatabaseMissing('users', [
+           'id' => $user->id
+        ]);
+
+        //$this->assertSame(0, User::count());
+    }
+
+Route::delete('/usuarios/{user}', 'UserController@destroy');
+
+function destroy(User $user)
+    {
+        $user->delete();
+
+        return redirect()->route('users.index');
+    }

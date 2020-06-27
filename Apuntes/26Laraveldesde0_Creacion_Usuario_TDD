@@ -1,0 +1,64 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson27
+https://laravel.com/docs/7.x/urls
+https://styde.net/rutas-para-formularios-en-laravel-metodo-post/
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+-----CrearUsuariosTDD------
+
+assertRedirect() comprobamos que el usuario sea redirigido a la URL dada:
+
+/** @test */
+function it_creates_a_new_user()
+{
+    $this->post('/usuarios/', [
+        'name' => 'Duilio',
+        'email' => 'duilio@styde.net',
+        'password' => '123456'
+    ])->assertRedirect('usuarios');
+}
+
+
+Para comprobar que se ha creado un usuario con los datos que hemos pasado en 
+la petición POST, utilizaremos el método assertDatabaseHas
+
+$this->assertDatabaseHas('users', [
+    'name' => 'Duilio',
+    'email' => 'duilio@styde.net'
+]);
+
+
+el método assertCredentials(), que nos permite comprobar la presencia de la 
+contraseña correcta. Como primer argumento pasamos un array con los datos que 
+esperamos encontrar. A este método no hace falta pasarle el nombre de la tabla, 
+siempre y cuando estemos utilizando la tabla de usuarios por defecto
+
+
+$this->assertCredentials([
+    'name' => 'Duilio',
+    'email' => 'duilio@styde.net',
+    'password' => '123456'
+]);
+
+
+$data = request()->all();
+ 
+// Luego de esto podemos acceder a los datos:
+ 
+$data['name'];
+
+r
+
+
+
+
+
+return redirect('usuarios'); // Redirigimos a la URL "/usuarios"
+ 
+return redirect()->route('users.index'); // Redirigimos a la ruta con el nombre "users.index
+
+//se puede poner el nombre de la tabla  'users'
+        // $this->assertCredentials(['users',[ 

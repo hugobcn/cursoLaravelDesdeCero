@@ -1,0 +1,37 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson26
+https://laravel.com/docs/7.x/urls
+https://styde.net/rutas-para-formularios-en-laravel-metodo-post/
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+-----POST------
+
+tener dos rutas que utilicen la misma URL pero con diferentes métodos
+
+Route::get('/usuarios', 'UserController@index');
+ 
+Route::post('/usuarios', 'UserController@create');
+
+php artisan route:list
+
+-----CRSF----
+
+El middleware VerifyCsrfToken nos permite evitar que terceros puedan enviar 
+peticiones de tipo POST a nuestra aplicación y realizar ataques de tipo cross-site 
+
+request forgery. Para agregar un campo con el token
+
+<form method="POST" action="{{ url('usuarios/crear') }}">
+    {{ csrf_field() }}
+ 
+    <button type="submit">Crear usuario</button>
+</form>
+
+
+public function create()
+    {
+        return view('users.create');
+    }

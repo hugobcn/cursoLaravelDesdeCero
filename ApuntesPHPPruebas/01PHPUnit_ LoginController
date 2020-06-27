@@ -1,0 +1,172 @@
+php artisan make:test Http/Controllers/Auth/LoginControllerTest
+
+public function login_displays_the_login_form()
+{
+    $response = $this->get(route('login'));
+
+    $response->assertStatus(200);
+    $response->assertViewIs('auth.login');
+}
+
+
+/** @test */
+public function login_displays_validation_errors()
+{
+    $response = $this->post('/login', []);
+
+    $response->assertStatus(302);
+    $response->assertSessionHasErrors('email');
+}
+
+ sent GET request before. To send a POST request we simply call post() instead. 
+Looking at the post() method signature we see it accepts additional arguments, 
+with the second being the request data.
+
+post(string $uri, array $data = [], array $headers = []);
+assertStatus to 302
+$response->assertSessionHasErrors('email');
+ 302 Found  indica que el recurso solicitado ha sido movido temporalmente a la 
+URL dada por las cabeceras Location. Un navegador redirecciona a esta página
+
+UserFactory:
+
+use App\User;
+use Illuminate\Support\Str;
+use Faker\Generator as Faker;
+
+$factory->define(User::class, function (Faker $faker) {
+    return [
+        'name' => $faker->name,
+        'email' => $faker->unique()->safeEmail,
+        'email_verified_at' => now(),
+        'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+        'remember_token' => Str::random(10),
+    ];
+});
+
+class LoginControllerTest extends TestCase
+{
++    use RefreshDatabase;
+
+** @test */
+public function login_authenticates_and_redirects_user()
+{
+    $user = factory(User::class)->create();
+
+    $response = $this->post(route('login'), [
+        'email' => $user->email,
+        'password' => 'password'
+    ]);
+
+    $response->assertRedirect(route('home'));
+    $this->assertAuthenticatedAs($user);
+}
+
+ All I need to do is add the RefreshDatabase
+$this->assertAuthenticatedAs($user);
+
+$name = $this->faker->name;
+    $email = $this->faker->safeEmail;
+    $password = $this->faker->password(8);
+
+    $response = $this->post('register', [
+        'name' => $name,
+        'email' => $email,
+        'password' => $password,
+        'password_confirmation' => $password,
+    ]);
+
+    $response->assertRedirect(route('home'));
+
+    $this->assertDatabaseHas('users', [
+        'name' => $name,
+        'email' => $email
+    ]);
+
+/** @test */
+public function register_creates_and_authenticates_a_user()
+{
+    $name = $this->faker->name;
+    $email = $this->faker->safeEmail;
+    $password = $this->faker->password(8);
+
+    $response = $this->post('register', [
+        'name' => $name,
+        'email' => $email,
+        'password' => $password,
+        'password_confirmation' => $password,
+    ]);
+
+    $response->assertRedirect(route('home'));
+
+    $user = User::where('email', $email)->where('name', $name)->first();
+    $this->assertNotNull($user);
+
+    $this->assertAuthenticatedAs($user);
+}
+
+namespace Tests\Feature\Http\Controllers\Auth;
+
+use App\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
+use Tests\TestCase;
+
+class RegisterControllerTest extends TestCase
+{
+    use RefreshDatabase, WithFaker;
+
+    /** @test */
+    public function register_returns_form_view()
+    {
+        $response = $this->get(route('register'));
+
+        $response->assertStatus(200);
+        $response->assertViewIs('auth.register');
+    }
+
+    /** @test */
+    public function register_returns_validation_error()
+    {
+        $response = $this->post('register', []);
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors(['name', 'email', 'password']);
+    }
+
+    /** @test */
+    public function register_creates_and_authenticates_a_user()
+    {
+        $name = $this->faker->name;
+        $email = $this->faker->safeEmail;
+        $password = $this->faker->password(8);
+
+        $response = $this->post('register', [
+            'name' => $name,
+            'email' => $email,
+            'password' => $password,
+            'password_confirmation' => $password,
+        ]);
+
+        $response->assertRedirect(route('home'));
+
+        $user = User::where('email', $email)->where('name', $name)->first();
+        $this->assertNotNull($user);
+
+        $this->assertAuthenticatedAs($user);
+    }
+}
+
+$user = factory(\App\User::class)->make();
+
+$this->actingAs($user);
+$this->route('post', 'rulers.create');
+$this->assertRedirectedToRoute('rulers.create');
+$this->assertSessionHasErrors();
+
+public function like_user_i_cant_create_an_empty_request()
+    {
+        $response = $this->call('POST', 'requests', ['_token' => csrf_token()]);
+
+        $this->assertSessionHasErrors();
+    }

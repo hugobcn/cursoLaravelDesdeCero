@@ -1,0 +1,48 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson6
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+
+-------------------------------------------------------
+
+-----------------VISTAS----------------------------
+
+
+public function index()
+    {
+        $users = [
+            'Joel',
+            'Ellie',
+            'Tess',
+            'Tommy',
+            'Bill',
+            '<script>alert("Clicker")</script>'
+        ];
+
+        $title = 'Listado de usuarios';
+
+        return view('users', compact('title', 'users'));
+    }
+
+
+<body>
+    <h1><?= e($title) ?></h1>
+
+    <ul>
+        <?php foreach ($users as $user): ?>
+            <li><?= e($user) ?></li>
+        <?php endforeach; ?>
+    </ul>
+</body>
+
+
+/** @test */
+    function it_loads_the_users_list_page()
+    {
+        $this->get('/usuarios')
+            ->assertStatus(200)
+            ->assertSee('Listado de usuarios')
+            ->assertSee('Joel')
+            ->assertSee('Ellie');
+    }

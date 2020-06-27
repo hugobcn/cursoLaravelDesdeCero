@@ -1,0 +1,56 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson8
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+---------env-------
+
+DB_DATABASE=laravelDesde0
+DB_USERNAME=admin
+DB_PASSWORD=admin
+
+---- Providers/AppServiceProvider-------
+use Illuminate\Support\Facades\Schema;
+
+public function boot()
+{
+    Schema::defaultStringLength(191);
+}
+
+php artisan migrate
+
+--------------------php artisan migrate---------------------------
+
+migrate:reset va a hacer un retroceso (roll back) : php artisan migrate:reset
+
+cambiar  migration create table :
+ $table->string('profession', 50)->nullable(); // Cambiamos el límite de 100 a 50
+
+
+ejecutar un reset de todas las migraciones (llamando al método down()) y luego 
+volverá a ejecutar las migraciones (llamando al método up
+
+php artisan migrate:refresh
+
+Modfificar migracion: php artisan make:migration add_profession_to_users  (xxxxxxx)
+
+metodo UP: 
+
+Schema::table('users', (Blueprint $table)) {
+    $table->string('profession', 50)->nullable();
+});
+
+metodo DOWN:
+
+Schema::table('users', function (Blueprint $table) {
+    $table->dropColumn('profession');
+});
+
+ Schema::table y agregar una columna, esta se va añadir al final de la tabla. 
+Podemos lograr que la columna se cree en la posición que indiquemos utilizando 
+el método after:
+
+$table->string('profession', 50)->nullable()->after('password
+
+
+php artisan migrate:rollback  Laravel regresará el último lote de migraciones ejecutado

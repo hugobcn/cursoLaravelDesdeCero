@@ -1,0 +1,128 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson14
+https://laravel.com/docs/7.x/eloquent-relationships
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+---------env-------
+
+DB_DATABASE=laravelDesde0
+DB_USERNAME=admin
+DB_PASSWORD=admin
+
+---- Providers/AppServiceProvider-------
+use Illuminate\Support\Facades\Schema;
+
+public function boot()
+{
+    Schema::defaultStringLength(191);
+}
+
+php artisan migrate
+
+----------------------Intro Eloquent---------------------------
+
+----MODEL---
+
+
+php artisan make:model ProfessionCategory
+
+php artisan make:model Models/Profession
+
+
+use Illuminate\Database\Eloquent\Model;
+
+class Profession extends Model
+{
+    //protected $table = 'my_professions';
+
+    //public $timestamps = false;
+}
+
+
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
+class User extends Authenticatable
+{
+    use Notifiable;
+
+    
+    protected $fillable = [
+        'name', 'email', 'password',
+    ];
+
+   
+    protected $hidden = [
+        'password', 'remember_token',
+    ];
+}
+
+--------APLICACION MODELOS------
+
+--------------------------------------
+
+se App\Profession;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class ProfessionSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+
+        Profession::create([
+            'title' => 'Desarrollador back-end',
+        ]);
+
+        Profession::create([
+            'title' => 'Desarrollador front-end',
+        ]);
+
+        Profession::create([
+            'title' => 'Diseñador web',
+        ]);
+    }
+}
+
+
+use App\User;
+use App\Profession;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class UserSeeder extends Seeder
+{
+    
+    public function run()
+    {
+        //$professions = DB::select('SELECT id FROM professions WHERE title = ?', ['Desarrollador back-end']);
+
+        $professionId = Profession::where('title', 'Desarrollador back-end')->value('id');
+
+        User::create([
+            'name' => 'Duilio Palacios',
+            'email' => 'duilio@styde.net',
+            'password' => bcrypt('laravel'),
+            'profession_id' => $professionId
+        ]);
+    }
+}
+
+-----------------------------------------------
+
+$professions = Profession::all();
+ 
+
+También podemos encadenar métodos del constructor de consultas para obtener resultados más específicos:
+
+$professionId = Profession::where('title', 'desarrollador back-end')->value('id');
+ 
+Podemos retonar un resultado dependiendo de su id mediante el método find():
+
+$profession = Profession::find(1);

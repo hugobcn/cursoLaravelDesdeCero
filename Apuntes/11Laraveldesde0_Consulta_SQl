@@ -1,0 +1,63 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson13
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson14
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+---------env-------
+
+DB_DATABASE=laravelDesde0
+DB_USERNAME=admin
+DB_PASSWORD=admin
+
+---- Providers/AppServiceProvider-------
+use Illuminate\Support\Facades\Schema;
+
+public function boot()
+{
+    Schema::defaultStringLength(191);
+}
+
+php artisan migrate
+
+-------SQL-------------
+https://laravel.com/docs/7.x/queries
+
+--insert---
+
+DB::table('professions')->insert([
+ 'title' => 'Desarrollador back-end',
+]);
+
+$sql = "SELECT * FROM articles WHERE id_author = $id";
+
+DB::insert('INSERT INTO professions (title) VALUES (?)', ['Desarrollador back-end']);
+
+DB::insert('INSERT INTO professions (title) VALUES (:title)', ['title' => 'Desarrollador back-end']);
+
+
+---SELECT
+
+DB::select('SELECT id FROM professions WHERE title = ?', ['Desarrollador back-end']);
+
+$professions = DB::table('professions')->select('id')->take(1)->get();
+
+$profession = DB::table('professions')->select('id')->where('title', '=', 'Desarrollador back-end')->first();
+
+where('title', 'Desarrollador back-end  where(['title' => 'Desarrollador back-end'])
+
+$profession = DB::table('professions')->whereTitle('Desarrollador back-end')->first();
+
+Omitir select
+
+$profession = DB::table('professions')->where('title', '=', 'Desarrollador back-end')->first();
+
+
+
+
+
+
+
+
+
+

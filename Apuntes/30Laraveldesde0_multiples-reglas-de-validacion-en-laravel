@@ -1,0 +1,156 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson31
+https://laravel.com/docs/7.x/urls
+https://laravel.com/docs/7.x/validation
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+
+-----multiples reglas de validacion----
+
+$data = request()->validate([
+    'name' => 'required',
+    'email' => '',
+    'password' => '',
+], [
+    'name.required' => 'El campo name es obligatorio'
+]);
+
+
+$data = request()->validate([
+    'name' => 'required',
+    'correo_electronico' => 'required|email',
+    'password' => '',
+], [
+    'name.required' => 'El campo name es obligatorio'
+]);
+
+
+'correo_electronico' => ['required', 'email', 'unique:users,email'],
+
+[
+    'name.required' => 'El campo name es obligatorio',
+    'correo_electronico.email' => 'Por favor ingresa una dirección valida',
+    'correo_electronico.unique' => 'Ya existe un usuario con ese email'
+]
+
+-----ejemplo---
+controller:
+
+public function store()
+    {
+        /*
+        //return redirect('usuarios/nuevo')->withInput();
+        
+         $data = request()->validate([
+            'name' => 'required'
+        ], [
+            'name.required' => 'El campo nombre es obligatorio'
+        ]);
+        
+        
+        $data = request()->all();
+        
+        if(empty($data['name']))
+        {
+            return redirect('usuarios/nuevo')->withErrors([
+                'name'=>'nombre campo obligatorio'
+            ]);
+        }
+        */
+        
+        
+         $data = request()->validate([
+            'name' => 'required',
+            'email' => ['required', 'email', 'unique:users,email'],
+            'password' => 'required',
+        ], [
+            'name.required' => 'El campo nombre es obligatorio'
+        ]);
+
+        User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => bcrypt($data['password'])
+        ]);
+
+        return redirect()->route('users.index');
+    }
+
+
+test:
+
+ 
+   /** @test */
+    function test_the_email_is_required()
+    {
+        $this->withoutExceptionHandling();
+        
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/', [
+                'name' => 'Duilio',
+                'email' => '',
+                'password' => '123456'
+            ])
+            ->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors(['email']);
+
+        $this->assertEquals(0, User::count());
+    }
+
+    /** @test */
+    function test_the_email_must_be_valid()
+    {
+        $this->withoutExceptionHandling();
+        
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/', [
+                'name' => 'Duilio',
+                'email' => 'correo-no-valido',
+                'password' => '123456'
+            ])
+            ->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors(['email']);
+
+        $this->assertEquals(0, User::count());
+    }
+
+    /** @test */
+    function test_the_email_must_be_unique()
+    {
+        $this->withoutExceptionHandling();
+        
+        factory(User::class)->create([
+            'email' => 'duilio@styde.net'
+        ]);
+
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/', [
+                'name' => 'Duilio',
+                'email' => 'duilio@styde.net',
+                'password' => '123456'
+            ])
+            ->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors(['email']);
+
+        $this->assertEquals(1, User::count());
+    }
+
+    /** @test */
+    function test_the_password_is_required()
+    {
+        $this->withoutExceptionHandling();
+        
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/', [
+                'name' => 'Duilio',
+                'email' => 'duilio@styde.net',
+                'password' => ''
+            ])
+            ->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors(['password']);
+
+        $this->assertEquals(0, User::count());
+    }

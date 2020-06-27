@@ -1,0 +1,95 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson24
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson25
+https://laravel.com/docs/7.x/urls
+https://laravel.com/api/5.8/Illuminate/Routing/UrlGenerator.html
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+-----REFERSHDATABASE------
+
+https://laravel.com/api/6.x/Illuminate/Foundation/Testing/RefreshDatabase.html
+https://dev.to/daniel_werner/under-the-hood-how-refreshdatabase-works-in-laravel-tests-2728
+https://42coders.com/under-the-hood-how-refreshdatabase-works-in-laravel-tests/
+
+Con  use RefreshDataBase; no cal poner DB::table('users')->truncate(); 
+en otros metodos para eliminar datos.
+
+$this->artisan('migrate');
+---------env-------
+
+DB_DATABASE=laravelDesde0
+DB_USERNAME=admin
+DB_PASSWORD=admin
+
+---- Providers/AppServiceProvider-------
+use Illuminate\Support\Facades\Schema;
+https://laravel.com/docs/7.x/dusk#migrations
+----------------------------------
+
+public function boot()
+{
+    Schema::defaultStringLength(191);
+}
+
+php artisan migrate
+
+---------------------404 ERRORES----------
+Retornar una vista con status 404:
+
+return response()->view('errors.404', [], 404);
+
+Uso de findOrFail, el registro correspondiente a la llave primaria pasada  devolverá una excepción de 
+tipo ModelNotFoundException:
+
+$user = User::findOrFail($id);
+$user = User::where('posts', '>', 100)->firstOrFail();
+
+/** @test */
+    function test_it_display_a_404_user_not_found()
+    {
+        $this->get('/usuarios/666')
+                ->assertStatus(404)
+           ->assertSee("Usuario no encontrado");
+        //"Mostrando detalle del usuario: {$id}"
+    }
+
+
+public function show($id)
+    {
+       $user= User::findOrFail($id);
+       /*
+       if($user == null){
+            return response()->view('errors.404',[],404);
+       }
+        */
+        return view('users.show', compact('id'));
+    }
+
+--ENLACE MODELOS RUTAS LARAVEL---
+
+public function show(User $user)
+{
+    return view('users.show', compact('user'));
+}
+
+Route::get('/usuarios/{user}', 'UserController@show');
+ 
+// y en el controlador:
+ 
+use App\User;
+ 
+class UserController {
+ 
+    public function show(User $user)
+    {
+        return view('users.show',compact('user');
+    }
+
+
+Route::get('/usuarios/{user}', 'UserController@show')
+    ->where('user', '[0-9]+')
+    ->name('users.show')    
+        ;

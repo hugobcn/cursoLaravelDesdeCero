@@ -1,0 +1,74 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson11
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+---------env-------
+
+DB_DATABASE=laravelDesde0
+DB_USERNAME=admin
+DB_PASSWORD=admin
+
+---- Providers/AppServiceProvider-------
+use Illuminate\Support\Facades\Schema;
+
+public function boot()
+{
+    Schema::defaultStringLength(191);
+}
+
+php artisan migrate
+
+--------------------php artisan migrate---------------------------
+
+php artisan make:migration create_professions_table
+or
+php artisan make:migration new_professions_table --create=professions  :
+
+public function up()
+{
+   Schema::create('professions', function (Blueprint $table) {
+            $table->id();
+           $table->string('title', 100);
+            $table->timestamps();
+            //$table->engine = 'InnoDB';
+        });
+
+}
+
+
+Al modificar una tabal poner el campo donde quieras (->before no funciona):
+ $table->BigInteger('profession_id')->unsigned()->after('password');        
+
+php artisan migrate   
+
+Aquí es importante que el tipo del campo profession_id coincida con el campo 
+id en la tabla professions. Es decir el campo profession_id debe ser definido 
+como un entero positivo, para ello usamos el método:
+
+$table->unsignedInteger('nombre_del_campo_aqui'); 
+o 
+$table->integer('nombre_del_campo')->unsigned();
+
+------------------------------
+
+ php artisan make:migration add_profession_id_to_users  
+
+public function up()
+    {
+        Schema::table('users', function (Blueprint $table) {
+           
+              $table->BigInteger('profession_id')->unsigned();       
+            $table->foreign('profession_id')->references('id')->on('professions');
+        });
+    }
+
+    public function down()
+    {
+        
+        Schema::table('users', function (Blueprint $table) {
+             $table->dropForeign(['profession_id']);
+            $table->dropColumn('profession_id');
+        });
+         
+    }

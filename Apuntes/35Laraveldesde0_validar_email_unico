@@ -1,0 +1,97 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson36
+https://laravel.com/docs/7.x/urls
+https://laravel.com/docs/7.x/validation
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+
+-----validar metodo unico----
+
+tabla columna email unico pero excluyendo el usuario que pasamos 
+$user->id como tercer parametro de la regla unique:
+
+$data = request()->validate([
+    'name' => 'required',
+    'email' => 'required|email|unique:users,email,'.$user->id,
+    'password' => '',
+]);
+
+interfaz provee Laravel con la clase Rule:
+
+'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)]
+
+tabla no utiliza id como clave primaria, especificar el nombre de la columna 
+al llamar al método ignore:
+
+'email' => ['required', 'email', Rule::unique('users')->ignore($user->id, 'user_id')]
+
+----exists-unique-in-y-not_in----------
+
+'post_feactured_id' => 'exists:posts,id
+
+'nickname' => "unique:user_profiles,nickname,{$profile->id}"
+
+'nickname' => Rule::unique('user_profiles')->ignore($profile->id
+
+
+    ignore($id, $idColumn = 'id') donde podemos indicar el id o valor a ignorar y opcionalmente el nombre de la columna.
+    where($column, $value = null)
+    whereNot($column, $value)
+    whereNull($column)
+    whereNotNull($column)
+    using(Closure $callback) donde puedes especificar condiciones más complejas.
+
+'post_feactured_id' => Rule::exists('posts', 'id')->where('user_id', auth()->id)
+
+'post_feactured_id' => Rule::exists('posts', 'id')
+     ->where('user_id', auth()->id)
+     ->where('points', '>=', 50)
+
+in y not_in
+
+Estas reglas de validación permiten restringir que el valor del campo a validar 
+se encuentre en el listado permitido (in) o no se encuente (not_in):
+
+'fruits' => Rule::in(['Apple', 'Banana', 'Orange'])
+
+Rule::notIn([1, 2, 3, 4])
+
+use Illuminate\Validation\Rule
+
+'password' => 'nullable|min:6' 
+
+----ejemplo----
+
+//'email' => 'required |email|unique:users,email,'.$user->id,
+
+public function update(User $user)
+    {
+        $data = request()->validate([
+            'name' => 'required',
+            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
+            'password' => '',
+        ]);
+
+        if ($data['password'] != null) {
+            $data['password'] = bcrypt($data['password']);
+        } else {
+            unset($data['password']);
+        }
+
+        $user->update($data);
+
+        return redirect()->route('users.show', ['user' => $user]);
+    }
+
+
+
+
+
+
+
+
+
+

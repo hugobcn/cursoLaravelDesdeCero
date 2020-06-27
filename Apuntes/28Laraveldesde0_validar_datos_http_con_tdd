@@ -1,0 +1,139 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson29
+https://laravel.com/docs/7.x/urls
+https://styde.net/rutas-para-formularios-en-laravel-metodo-post/
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+-----VALIDAR------
+
+prueba comprobamos que la sesión contiene un error para el campo name utilizando 
+assertSessionHasErrors
+
+$this->from('usuarios/nuevo')
+    ->post('/usuarios/', [
+        'name' => '',
+        'email' => 'duilio@styde.net',
+        'password' => '123456'
+    ])
+    ->assertRedirect('usuarios/nuevo')
+    ->assertSessionHasErrors(['name']);
+
+assertSessionHasErrors espera que exista un campo name en el listado de errores
+ de la sesión, independientemente del contenido o mensaje de este error. 
+Sin embargo podemos indicar cual esperamos que sea el contenido o mensaje 
+pasando un array de pares clave-valor 
+
+$this->post('...')->assertSessionHasErrors(['name' => 'El campo nombre es obligatorio'])
+
+assertDatabaseMissing verificamos que el registro no se esté guardando en la base de datos, 
+al finalizar la petición ejecutada durante el método de prueba:
+
+
+$this->assertDatabaseMissing('users', [
+    'email' => 'duilio@styde.net'
+]);
+
+el método assertEquals en lugar de assertDatabaseMissing para comprobar que el
+ usuario no está siendo guardado en la base de datos:
+
+$this->assertEquals(0, User::count());
+
+ ya que dentro de la prueba estamos utilizando el trait RefreshDatabase.
+
+
+----psar errores----
+
+return redirect('usuarios/nuevo')->withErrors([
+    'name' => 'El campo nombre es obligatorio']);
+
+----VALIDACION---
+
+validate() en el objeto request pasando como valor un array asociativo donde 
+cada llave será el nombre de cada campo esperado y el valor una cadena con las 
+reglas de validación
+
+$data = request()->validate([
+    'name' => 'required'
+]);
+
+caso required
+
+
+$data = request()->validate([
+    'name' => 'required'
+], [
+    'name.required' => 'El campo nombre es obligatorio'
+]);
+
+
+
+//->from('usuarios/nuevo') envia a la url ->assertRedirect('usuarios')
+        // anterior y prueba no tiene url anterior
+        
+        $this->from('usuarios/nuevo')->post('/usuarios/', [
+           ....
+        ])->assertRedirect('usuarios')
+          ->assertSessionHasErrors(['name'=> 'nombre campo obligatorio']);
+          
+
+$data = request()->validate([
+            'name' => 'required'
+        ], [
+            'name.required' => 'El campo nombre es obligatorio'
+        ]);
+
+-----------------------------------------
+
+
+/** @test */
+    function test_name_is_required()
+    {
+        $this->withoutExceptionHandling();
+
+        //->from('usuarios/nuevo') envia a la url ->assertRedirect('usuarios')
+        // anterior y prueba no tiene url anterior
+        
+        $this->from('usuarios/nuevo')->post('/usuarios/', [
+            'name'=>'',
+            'email' => 'duilio@styde.net',
+            'password' => '123456'
+        ])->assertRedirect('usuarios')
+          ->assertSessionHasErrors(['name'=> 'nombre campo obligatorio']);
+          //assertSessionHasErrors('name'); verificar si tiene algun error
+        $this->assertDatabaseMissing('users',['email'=>'xxxx@yyy.ex']);
+            //assertDatabaseMissing('users')  que no hay este elemento repetido
+       
+    }
+
+public function store()
+    {
+         $data = request()->validate([
+            'name' => 'required'
+        ], [
+            'name.required' => 'El campo nombre es obligatorio'
+        ]);
+        
+        /*
+        $data = request()->all();
+
+        if(empty($data['name']))
+        {
+            return redirect('usuarios/nuevo')->withErrors([
+                'name'=>'nombre campo obligatorio'
+            ]);
+        }
+        */
+        
+        
+        User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => bcrypt($data['password'])
+        ]);
+
+        return redirect()->route('users.index');
+    }
+

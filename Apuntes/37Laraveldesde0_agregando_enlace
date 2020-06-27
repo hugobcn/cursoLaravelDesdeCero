@@ -1,0 +1,93 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson36
+https://laravel.com/docs/7.x/urls
+https://laravel.com/docs/7.x/validation
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+
+-----validar metodo unico----
+
+Si tratamos de acceder a una URL que existe pero utilizando un método 
+diferente recibiremos una excepción de tipo MethodNotAllowed
+
+rutas: Route::delete('/usuarios/{user}', 'UserController@destroy
+
+$this->delete("users/{$user->id
+
+assertDatabaseMissing comprobamos el registro ya no existe en la base de datos. 
+primer argumento pasamos el nombre de la tabla y como segundo el array de atributos:
+
+$this->assertDatabaseMissing('users', [
+    'id' => $user->id
+]);
+
+assertSame,primer argumento el valor esperado y segundo argumento la cantidad de 
+usuarios actua:
+
+$this->assertSame(0, User::count());
+
+modelo con Route Model Binding podemos llamar al método delete:
+
+function destroy(User $user) {
+    $user->delete();
+ 
+    return redirect()->route('users.index');
+}
+
+
+Sino lo contraia tendriamos que escribir:
+
+$user = User::findOrFail($id);
+
+$user->delete();
+
+Escribir URL puede usar el nombre ruta:
+
+return redirect()->route('users.index');
+
+
+--------ejemplo----------
+
+
+/** @test */
+    function it_deletes_a_user()
+    {
+        $this->withoutExceptionHandling();
+
+        $user = factory(User::class)->create();
+
+        $this->delete("usuarios/{$user->id}")
+            ->assertRedirect('usuarios');
+
+        $this->assertDatabaseMissing('users', [
+           'id' => $user->id
+        ]);
+
+        //$this->assertSame(0, User::count());
+    }
+
+
+ 
+Si tratamos de acceder a una URL que existe pero utilizando un método 
+diferente recibiremos una excepción de tipo MethodNotAllowed, entonces crear 
+ruta delete:
+
+
+Route::delete('/usuarios/{user}', 'UserController@destroy');
+
+controller;
+
+
+function destroy(User $user)
+    {
+        $user->delete();
+
+        return redirect()->route('users.index');
+    }
+
+
+
+

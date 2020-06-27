@@ -1,0 +1,92 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson33
+https://laravel.com/docs/7.x/urls
+https://laravel.com/docs/7.x/validation
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+
+-----método put()----
+
+mensajes de error en array asociativo, segundo argumento al método validate():
+
+$data = request()->validate([
+    'name' => 'required'
+], [
+    'name.required' => 'El campo nombre es obligatorio'
+]);
+
+assertCredentials verificar credenciales del usuario en la base de datos:
+
+$this->assertCredentials([
+    'name' => 'Duilio',
+    'email' => 'duilio@styde.net',
+    'password' => $oldPassword
+]);
+
+no null encriptamos contrasenya, sino unset() eliminar índice password de $data:
+
+if ($data['password'] != null) {
+    $data['password'] = bcrypt($data['password']);
+} else {
+    unset($data['password']);
+}
+
+----ejemplo----
+
+public function update(User $user)
+{
+    $this->withExceptionHandling();
+
+    //$user->update(request()->all());
+
+    $data = request()->validate([
+        'name'=>'required',
+        'email' => 'required' | 'email',
+        'password' => ''
+        
+    ]);
+
+    if ($data['password'] != null) {
+    $data['password'] = bcrypt($data['password']);
+    } else {
+    unset($data['password']);
+    }
+
+    $user->update($data);
+
+    return redirect()->route("users.show",['user'=>$user]);
+    //return redirect()->route("users.show",['user'=>$user->id]);
+}
+
+
+/** @test */
+    function test_password_is_optional_update()
+    {
+
+        $this->withoutExceptionHandling();
+
+        $user = factory(User::class)->create([
+            'password'=> bcrypt('clave_anterior')
+                ]);
+
+        $this->from('usuarios/{$user->id}/editar')
+                ->put('usuarios/{$user->id}', [
+                'name' => 'hugo',
+                'email' => 'duilio@styde.net',
+                'password' => ''
+            ])
+            ->assertRedirect('usuarios/{$user->id}')//users.show
+            ->assertSessionHasErrors(['password']);
+
+        
+        $this->assertCredentials([
+            'name'=>'hugo',
+            'email'=> 'xxxx@yyy.es',
+            'password'=> 'clave_anterior' //VIV //'password'=> 'clave_anterior' //VIV
+            ]);
+
+        //$this->assertEquals(0, User::count());
+    }

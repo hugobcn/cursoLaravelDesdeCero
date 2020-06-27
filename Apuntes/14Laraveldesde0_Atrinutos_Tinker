@@ -1,0 +1,105 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson16
+https://styde.net/manejo-de-atributos-en-eloquent-orm-solucion-a-massassignmentexception/
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+---------env-------
+
+DB_DATABASE=laravelDesde0
+DB_USERNAME=admin
+DB_PASSWORD=admin
+
+---- Providers/AppServiceProvider-------
+use Illuminate\Support\Facades\Schema;
+
+public function boot()
+{
+    Schema::defaultStringLength(191);
+}
+
+php artisan migrate
+
+----------------------Atributos ELoquent---------------------------
+
+use Illuminate\Database\Eloquent\Model;
+
+class Profession extends Model
+{
+    //protected $table = 'my_professions';
+
+    //public $timestamps = false;
+
+    protected $fillable = ['title'];
+}
+
+-------------------------------------------------------
+
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
+class User extends Authenticatable
+{
+    use Notifiable;
+
+    
+     protected $guarded = ['is_admin'];
+
+
+    protected $fillable = [
+        'name', 'email', 'password',
+    ];
+
+   
+    protected $hidden = [
+        'password', 'remember_token',
+    ];
+
+    protected $casts = [
+        'is_admin' => 'boolean'
+    ];
+
+    public static function findByEmail($email)
+    {
+        return static::where(compact('email'))->first();
+    }
+
+    public function isAdmin()
+    {
+        return $this->email === 'duilio@styde.net';
+    }
+}
+
+
+----------------------------------------
+
+$user = new User(['name' => 'Duilio', 'password' => bcrypt('123')]);
+ 
+$user->is_admin = true;
+ 
+$user->save();
+
+-------------------------------
+
+$guarded. Al igual que $fillable, esta propiedad tendrá como valor un array, pero en este caso las columnas que indicamos son las que no queremos que puedan ser cargadas de forma masiva:
+
+class User extends Model
+{
+    protected $guarded = ['is_admin'];
+}
+
+Nota que new User($datos) solo crea un nuevo modelo sin persistirlo en la base 
+de datos VS User::create($datos) que crea un nuevo modelo y lo inserta en la base 
+de datos en un solo paso.
+
+La propiedad $casts nos permite convertir atributos a diferentes tipos de datos
+dentro de un modelo:
+
+protected $casts = [
+    'is_admin' => 'boolean'
+];
+
+
+$xxxx 0 $bed=Profession::where('title','dessarollador xxxx')->first();
+
+$bed=Profession::where('title','dessarollador xxxx')->first();

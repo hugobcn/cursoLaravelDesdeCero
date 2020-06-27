@@ -1,0 +1,78 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson15
+https://laravel.com/docs/5.5/eloquent-collections#available-methods
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+---------env-------
+
+DB_DATABASE=laravelDesde0
+DB_USERNAME=admin
+DB_PASSWORD=admin
+
+---- Providers/AppServiceProvider-------
+use Illuminate\Support\Facades\Schema;
+
+public function boot()
+{
+    Schema::defaultStringLength(191);
+}
+
+php artisan migrate
+
+----------------------ELOQUENT TINKER---------------------------
+
+php artisan tinker
+
+$professions = Profession::all();
+
+$professions = Profession::get();
+
+$profession->first(); // Obtenemos el primer resultado
+ 
+$profession->last(); // Obtenemos el último resultado
+ 
+$profession->random(1); // Obtenemos un resultado aleatorio
+
+
+pluck() podemos retornar una nueva colección que contenga un listado de un solo campo:
+
+$professions->pluck('title
+
+=> Illuminate\Support\Collection {#736
+     all: [
+       "Desarrollador back-end",
+       "Desarrollador front-end",
+       "Diseñador web",
+     ],
+   }
+
+
+-----------cOLLECION DE FORMA MANUAL---------------
+
+collect(['Duilio', 'Styde', 'Laravel']);
+
+
+-----DECLARAR METODOS NO ESTATICOS----
+
+
+public function isAdmin()
+{
+    return $this->email === 'duilio@styde.net';
+}
+
+$user = User::find(1);
+$user->isAdmin(); // Devuelve true o false
+
+-----DECLARAR METODOS ESTATICOS----
+
+public static function findByEmail($email)
+{
+    return static::where('email', $email)->first();
+}
+
+------
+
+$xxxx 0 $bed=Profession::where('title','dessarollador xxxx')->first();
+
+$bed=Profession::where('title','dessarollador xxxx')->first();

@@ -1,0 +1,153 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson5
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+
+-----test-----
+https://www.laraveltip.com/haciendo-pruebas-automatizadas-en-laravel/
+https://laravel.com/docs/7.x/testing
+alias t=vendor/bin/phpunit
+/** @test */
+
+----git----
+
+subir a git local:
+
+$ git init
+$ git add .                          
+$ git status
+$ git commit -m  "laravelDesde0V00"
+
+git push https://github.com/user/example master:master
+git push --mirror https://github.com/my_username/my_repo.git
+git push -u origin master 
+make git m="your message"
+$ clear
+
+bajar git clone --bare https://git.fedorahosted.org/the/path/to/my_repo.git
+----logs----
+
+/storage/logs/laravel.logs
+
+----------------------------------
+
+
+---FUNCIONES-----
+
+h() e() -> imprimir el codigo en html en web
+<?=  ?> -> imprimir solo en php
+
+<h1><?= e($title) ?></h1>
+
+
+compact() ( crear array de un listado. 
+busca una variable con ese nombre en la tabla de símbolos actual y 
+las añade al array de salida de modo que el nombre de la variable se convierte 
+en la clave y el contenido de la variable se convierte en el valor para esa clave
+
+$users = ['Joel','Ellie,'Tess','<script>alert("Clicker")</script>'];
+
+        $title = 'Listado de usuarios';
+
+        return view('users', compact('title', 'users'));
+
+@empty(users) xxx @else xxxx @endempty
+@forelse ($users as $user) xxxx @empty <li>mensaje si hay error</li> @endforelse
+{{-- @unless(empty($users))  sino inverso @if --}}
+
+-----layouts views-----
+https://laravel.com/docs/7.x/blade#extending-a-
+https://richos.gitbooks.io/laravel-5/content/capitulos/chapter10.html
+
+
+asset nos dará la ruta absoluta al archivo indicado: 
+<link href="{{ asset('css/style.css') }}" rel="stylesheet">
+
+gregar tantas directivas @yield como quieras a tu layout:
+
+<title>@yield('title') - Styde.net</title>
+
+debe extender de layout.blade.php(defecto buscará el archivo dentro del 
+directorio resources/views):
+
+@extends('layout')
+
+ definir las secciones. Para ello utilizamos la directiva @section,
+ pasando como argumento el nombre de la sección:
+
+@section('title') Usuario {{ $id }} @endsection
+ 
+@section('content')
+    <!-- Contenido de la sección -->
+@endsection
+
+----La directiva @section define una sección de contenido, mientras que la directiva @yield---
+@show: Esta sentencia se usa para decir donde termina el section definido en el template:
+
+@section('sidebar')
+                <h2>Barra lateral</h2>
+@show
+
+
+
+@parent: Esta sentencia nos ayuda a cargar el contenido por defecto de un section del template, 
+esto podemos usarlo cuando queremos agregar mas contenido dentro pero sin alterar el 
+contenido por defecto, es decir agregarle mas HTML, esta sentencia se usa dentro de un section, 
+podemos hacer un simil con el super() de Java que sirve para llamar al contructor de la 
+superclase de la que se hereda.
+
+@section('sidebar')
+    @parent
+
+    <h2>Barra lateral personalizada!</h2>
+@endsection
+
+@stop: Esta sentencia nos permite decir donde termina un section cuando se usa el section dentro de las vistas hijas.
+
+-----DDBB & MIGRATION-----
+
+--env-------
+
+DB_DATABASE=laravelDesde0
+DB_USERNAME=admin
+DB_PASSWORD=admin
+
+-- Providers/AppServiceProvider-------
+
+
+public function boot()
+{
+    Schema::defaultStringLength(191);
+}
+
+php artisan migrate
+
+https://laravel.com/docs/7.x/queries
+-------------------------------------------
+php artisan db:seed --class=ProfessionSeeder
+
+php artisan migrate:fresh --seed
+
+---------------php artisan tinker--------------------
+
+$user = new User(['name' => 'Duilio', 'password' => bcrypt('123')]);
+ 
+$user->is_admin = true;
+ 
+$user->save();
+
+$user->exists;  (booleano)
+
+$user->delete();
+
+----------------
+
+$professions = Profession::all();
+
+$professions = Profession::get();
+
+$profession->first();
+
+$bed=Profession::where('title','dessarollador xxxx')->first();
+
+

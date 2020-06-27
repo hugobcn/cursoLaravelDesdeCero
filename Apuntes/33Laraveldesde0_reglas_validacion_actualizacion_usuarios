@@ -1,0 +1,169 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson33
+https://laravel.com/docs/7.x/urls
+https://laravel.com/docs/7.x/validation
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+
+-----método put()----
+
+Debemos el método from() URL del formulario antes 
+del método put() probar redirección correcta:
+
+$this->from("usuarios/{user->id}/editar")->put("usuarios/{$user->id}", [
+    // ...    
+]);
+
+request()->validate() recibimos datos y comprobamos que cumplan reglas:
+
+$data = request()->validate([
+    'name' => 'required',
+    'email' => '',
+    'password' => '',
+]);
+
+PUT en formulario,method_field() para generar campo oculto indicar tipo petición:
+
+<form method="POST" action="{{ url("usuarios/{$user->id}") }}">
+    {{ method_field('PUT') }}
+    {{csrf_field()}}
+ 
+    ...
+</form>
+
+
+------ejemplo----
+
+/** @test */
+    function test_the_name_is_required_update()
+    {
+
+        $this->withoutExceptionHandling();
+
+        $user = factory(User::class)->create();
+
+        $this->from('usuarios/{$user->id}/editar')
+                ->put('usuarios/{$user->id}', [
+                'name' => '',
+                'email' => 'duilio@styde.net',
+                'password' => '123456'
+            ])
+            ->assertRedirect('usuarios/{$user->id}/editar')
+            ->assertSessionHasErrors(['name']);
+
+        //no se repita el correo especifico
+        $this->assertDataBaseMissing('users',['email'=> 'xxxx@yyy.es']);
+
+        //$this->assertEquals(0, User::count());
+    }
+
+
+    /** @test */
+    function test_email_is_valid_update()
+    {
+
+        $this->withoutExceptionHandling();
+
+        $user = factory(User::class)->create(['name'=>'nombre inicial']);
+
+        $this->from('usuarios/{$user->id}/editar')
+                ->put('usuarios/{$user->id}', [
+                'name' => 'hugo bermudez',
+                'email' => 'correo_invalido',
+                'password' => '123456'
+            ])
+            ->assertRedirect('usuarios/{$user->id}/editar')
+            ->assertSessionHasErrors(['email']);
+
+        //no se repita el correo especifico
+        $this->assertDataBaseMissing('users',['name'=> 'hugo bermudez']);
+
+        //$this->assertEquals(0, User::count());
+    }
+
+
+
+     /** @test */
+    function test_email_unique_update()
+    {
+
+        self::markTestincomplete();
+        return;
+
+        $user = factory(User::class)->create(['email'=>'xxxx@yyy.es']);
+
+        $this->from('usuarios/{$user->id}/editar')
+                ->put('usuarios/{$user->id}', [
+                'name' => 'hugo bermudez',
+                'email' => 'xxxx@yyy.es',
+                'password' => '123456'
+            ])
+            ->assertRedirect('usuarios/{$user->id}/editar')
+            ->assertSessionHasErrors(['email']);
+
+        //no se repita el correo especifico
+        //$this->assertDataBaseMissing('users',['name'=> 'hugo bermudez']);
+
+        $this->assertEquals(0, User::count());
+    }
+
+     /** @test */
+    function test_password_required_update()
+    {
+
+        //self::markTestincomplete();
+        //return;
+
+        $user = factory(User::class)->create();//['email'=>'xxxx@yyy.es']);
+
+        $this->from('usuarios/{$user->id}/editar')
+                ->put('usuarios/{$user->id}', [
+                'name' => 'hugo bermudez',
+                'email' => 'xxxx@yyy.es',
+                'password' => ''
+            ])
+            ->assertRedirect('usuarios/{$user->id}/editar')
+            ->assertSessionHasErrors(['password']);
+
+        //no se repita el correo especifico
+        $this->assertDataBaseMissing('users',['email'=>'xxxx@yyy.es']);
+
+        //$this->assertEquals(0, User::count());
+    }
+
+controll:
+
+public function update(User $user)
+{
+    $this->withExceptionHandling();
+
+    //$user->update(request()->all());
+
+    $data = request()->validate([
+        'name'=>'required',
+        'email' => 'required' | 'email',
+        'password' => 'required'
+        
+    ]);
+
+    $data['password'] = bcrypt($data['password']);
+
+    $user->update($data);
+
+    return redirect()->route("users.show",['user'=>$user]);
+    //return redirect()->route("users.show",['user'=>$user->id]);
+}
+
+
+
+vsita:
+             
+<form method="POST" action="{{ url("usuarios/{$user->id}") }}">
+    {{ method_field('PUT') }}
+    {{csrf_field()}}
+ 
+    ...
+</form>

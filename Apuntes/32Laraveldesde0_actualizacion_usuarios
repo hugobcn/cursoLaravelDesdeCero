@@ -1,0 +1,74 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson33
+https://laravel.com/docs/7.x/urls
+https://laravel.com/docs/7.x/validation
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+
+-----método put()----
+
+Put para actualizar:
+
+$this->put("/usuarios/{$user->id}", [
+    'name' => 'Duilio',
+    'email' => 'duilio@styde.net',
+    'password' => '123456'
+])->assertRedirect('usuarios');
+
+
+El método GET utilizando $this->get() muestra la página de detalles.
+El método PUT utilizando $this->put() ejecuta la acción para actualizar.
+
+Route::put('/usuarios/{user}', 'UserController@update');
+
+ encriptar la contraseña bcrypt antes de pasar los datos al método update():
+
+$data = request()->all();
+ 
+$data['password'] = bcrypt($data['password']);
+ 
+$data->update($data);
+
+-----ejemplo----
+
+ /** @test */
+    function test_update_user()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->put('/usuarios/{$user->id}', [
+            'name' => 'Duilio',
+            'email' => 'duilio@styde.net',
+            'password' => '123456'
+        ])->assertRedirect('/usuarios/{$user->id}');
+
+        $this->assertCredentials([
+            'name' => 'Duilio',
+            'email' => 'duilio@styde.net',
+            'password' => '123456',
+        ]);
+    }
+
+web:
+
+Route::put('/usuarios/{user}', 'UserController@update');
+
+controll:
+
+public function update(User $user)
+{
+    //$user->update(request()->all());
+
+    $data = request()->all();
+
+    $data['password'] = bcrypt($data['password']);
+
+    $user->update($data);
+
+    return redirect()->route("users.show",['user'=>$user]);
+    //return redirect()->route("users.show",['user'=>$user->id]);
+}
+

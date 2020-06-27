@@ -1,0 +1,81 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson17
+https://laravel.com/docs/5.5/eloquent-relationships
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+---------env-------
+
+DB_DATABASE=laravelDesde0
+DB_USERNAME=admin
+DB_PASSWORD=admin
+
+---- Providers/AppServiceProvider-------
+use Illuminate\Support\Facades\Schema;
+
+public function boot()
+{
+    Schema::defaultStringLength(191);
+}
+
+php artisan migrate
+
+----------------------RELACIONES ELOQUENT---------------------------
+
+---Pertenece a--------------
+
+El método belongsTo nos permite trabajar con relaciones donde un registro pertenece 
+a otro registro. Este método acepta como primer argumento el nombre de la clase que 
+queremos vincular
+
+User.php:
+Usuario pertenece a una profesion.
+
+public function profession()
+{
+    return $this->belongsTo(Profession::class);
+}
+
+Si en tu base de datos el nombre de la llave foránea no sigue esta convención 
+puedes pasar el nombre de la columna como segundo argumento:
+
+public function profession()
+{
+    return $this->belongsTo(Profession::class, 'id_profession');
+}
+
+si el modelo padre no usa una columna id como su llave primaria o quieres 
+relacionar el modelo a una columna diferente, puedes pasar un tercer argumento 
+especificando el nombre de la columna que actuaría como llave del modelo padre:
+
+public function profession()
+{
+    return $this->belongsTo(Profession::class, 'profession_name', 'name');
+}
+
+php artisan thinker:
+
+$user = User::first();
+$user->profession;
+$user->refresh();
+$user->profession(); (saber tipo ralacion entre elementos )
+
+------uno a muchos con hasMany-----------
+Una profesion puede tener  muchos usuarios
+
+
+Profesion.php:
+
+public function users()
+{
+    return $this->hasMany(User::class);
+}
+
+php artisan tinker
+
+$profession = Profession:first();
+$profession->users;
+
+Construir consultas: $profession->users()->where('is_admin', true)->get();
+
+$profesion_>users()->where('is_admin',true)->get();

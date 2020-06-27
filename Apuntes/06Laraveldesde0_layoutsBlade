@@ -1,0 +1,57 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson8
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+
+---------------------LAYOUTS TEORIA----------------------------------
+
+asset nos dará la ruta absoluta al archivo indicado: 
+<link href="{{ asset('css/style.css') }}" rel="stylesheet">
+
+gregar tantas directivas @yield como quieras a tu layout:
+
+<title>@yield('title') - Styde.net</title>
+
+debe extender de layout.blade.php(defecto buscará el archivo dentro del directorio resources/views):
+
+@extends('layout')
+
+ definir las secciones. Para ello utilizamos la directiva @section,
+ pasando como argumento el nombre de la sección:
+
+@section('title') Usuario {{ $id }} @endsection
+ 
+@section('content')
+    <!-- Contenido de la sección -->
+@endsection
+
+La directiva @section define una sección de contenido, mientras que la directiva @yield
+
+------EJEMPLO----
+
+public function show($id)
+    {
+        //carpeta users/show
+        return view('users.show', compact('id'));
+    }
+-----------------
+@extends('layout')
+
+@section('title', 'Usuarios')
+@section('title', "Usuario {$id}")
+
+@section('sidebar')
+    @parent
+
+    <h2>Barra lateral personalizada!</h2>
+@endsection
+
+-------------layout-------
+<title>@yield('title') - Styde.net</title>
+ @yield('content')
+        </div>
+        <div class="col-4">
+            @section('sidebar')
+                <h2>Barra lateral</h2>
+            @show

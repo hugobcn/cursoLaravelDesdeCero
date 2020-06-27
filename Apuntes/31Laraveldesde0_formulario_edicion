@@ -1,0 +1,105 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/lesson32
+https://laravel.com/docs/7.x/urls
+https://laravel.com/docs/7.x/validation
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+
+-----Uso de assertViewIs y assertViewHas----
+
+assertViewIs podemos comprobar que la vista retornada desde el controlador
+
+$this->get("/usuarios/{$user->id}/editar")
+   ->assertStatus(200)
+   ->assertViewIs('users.edit');
+
+assertViewHas podemos comprobar que la vista contiene la variable 
+pasada como argumento:
+
+->assertViewHas('user');
+
+->assertViewHas('user', function ($viewUser) use ($user) {
+    return $viewUser->id === $user->id;
+})
+
+old() cargar datos referentes al campo name y sino los valor de $user->name:
+
+<input type="text" name="name" id="name" placeholder="Pedro Perez"
+ value="{{ old('name', $user->name) }}">
+
+----ejemplos-----
+
+/** @test */
+    function test_it_loads_the_edit_user_page()
+    {
+        $this->withoutExceptionHandling();
+
+        $user = factory(User::class)->create();
+
+        $this->get("/usuarios/{$user->id}/editar") // usuarios/5/editar
+            ->assertStatus(200)
+            ->assertViewIs('users.edit')
+            ->assertSee('Editar usuario')
+            ->assertViewHas('user', function ($viewUser) use ($user) {
+                return $viewUser->id === $user->id;
+            });
+    }
+
+web:
+
+Route::get('/usuarios/{user}/editar','UserController@edit')->name('users.edit');
+
+
+controller:
+
+public function edit(User $user)
+    {
+        return view('users.edit', ['user' => $user]);
+    }
+
+views/users/edit.blade.php:
+
+@extends('layout')
+
+@section('title', "Crear usuario")
+
+@section('content')
+    <h1>Editar usuario</h1>
+
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <h6>Por favor corrige los errores debajo:</h6>
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form method="POST" action="{{ url('usuarios') }}">
+        {{ csrf_field() }}
+
+        <label for="name">Nombre:</label>
+        <input type="text" name="name" id="name" placeholder="Pedro Perez" value="{{ old('name', $user->name) }}">
+        <br>
+        <label for="email">Correo electrónico:</label>
+        <input type="email" name="email" id="email" placeholder="pedro@example.com" value="{{ old('email', $user->email) }}">
+        <br>
+        <label for="password">Contraseña:</label>
+        <input type="password" name="password" id="password" placeholder="Mayor a 6 caracteres">
+        <br>
+        <button type="submit">Actualizar usuario</button>
+    </form>
+
+    <p>
+        <a href="{{ route('users.index') }}">Regresar al listado de usuarios</a>
+    </p>
+@endsection
+
+
+
+ 
