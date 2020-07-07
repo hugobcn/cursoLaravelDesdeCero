@@ -1,0 +1,163 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/checkboxes
+https://styde.net/nueva-forma-de-validar-peticiones-y-obtener-datos-en-laravel-5-5/
+https://styde.net/componentes-dinamicos-para-formularios-con-blade-y-laravel/
+https://styde.net/instalacion-del-paquete-styde-html
+https://styde.net/creando-formularios-con-el-paquete-styde-html/
+
+subir a git local:
+
+$ git init
+$ git add .                          
+$ git status
+$ git commit -m  "laravelDesde0V00
+$ clear
+------------------------------------------------
+
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+
+------------------Refresdate Test-------
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class UsersModuleTest extends TestCase {
+
+    use RefreshDatabase;
+
+----------------$this->assertDatabaseEmpty('users');--------------
+
+Para agregar el atributo checked de forma dinámica obtenemos el valor del campo skills
+
+{{ in_array($skill->id, old('skills')) ? 'checked' : '' }}
+
+Sin embargo, el código de arriba nos puede generar el error:
+
+Error in_array() expects parameter 2 to be array, null given 
+
+debido a que la función in_array() espera como segundo parametro un arreglo 
+y nosotros estamos pasando null.comprobar que al llamar a old('skills')
+
+
+{{ is_array(old('skills')) && in_array($skill->id, old('skills')) ? 'checked' : '' }}
+
+Otra solucion:
+
+Para ello necesitaremos asignar el id de la habilidad como índice del campo y 
+así obtenerlo luego mediante old
+
+
+<input name="skills[{{ $skill->id }}]"
+       ...
+       {{ old("skills.{$skill->id}") ? 'checked' : ''}}>
+
+
+------ejemplo-----
+
+view:
+
+ <h5>Habilidades</h5>
+
+                @foreach($skills as $skill)
+                <div class="form-check form-check-inline">
+                    <input name="skills[{{ $skill->id }}]"
+                           class="form-check-input"
+                           type="checkbox"
+                           id="skill_{{ $skill->id }}"
+                           value="{{ $skill->id }}"
+                           {{ old("skills.{$skill->id}") ? 'checked' : '' }}>
+                    <label class="form-check-label" for="skill_{{ $skill->id }}">{{ $skill->name }}</label>
+                </div>
+                @endforeach
+
+test: 
+
+/** @test */
+    function test_it_loads_the_new_users_page()
+    {
+        $this->withoutExceptionHandling();
+
+        $profession = factory(Profession::class)->create();
+
+        $skillA = factory(Skill::class)->create();
+        $skillB = factory(Skill::class)->create();
+
+        $this->get('/usuarios/nuevo')
+            ->assertStatus(200)
+            ->assertSee('Crear usuario')
+            ->assertViewHas('professions', function ($professions) use ($profession) {
+                return $professions->contains($profession);
+            })
+            ->assertViewHas('skills', function ($skills) use ($skillA, $skillB) {
+                return $skills->contains($skillA) && $skills->contains($skillB);
+            });
+    }
+
+user controller:
+
+public function create()
+    {
+        $professions = Profession::orderBy('title', 'ASC')->get();
+        $skills = Skill::orderBy('name', 'ASC')->get();
+
+        return view('users.create', compact('professions', 'skills'));
+    }
+
+error 500 , no name column:
+
+migrate:
+
+public function up()
+    {
+        Schema::create('skills', function (Blueprint $table) {
+            $table->increments('id');
+
+            $table->string('name')->unique();
+
+            $table->timestamps();
+        });
+    }
+
+
+factory:
+
+$factory->define(App\Skill::class, function (Faker $faker) {
+    return [
+        'name' => $faker->unique()->sentence(3),
+    ];
+});
+
+
+seeder:
+
+public function run()
+    {
+        factory(\App\Skill::class)->create(['name' => 'HTML']);
+        factory(\App\Skill::class)->create(['name' => 'CSS']);
+        factory(\App\Skill::class)->create(['name' => 'JS']);
+        factory(\App\Skill::class)->create(['name' => 'PHP']);
+        factory(\App\Skill::class)->create(['name' => 'SQL']);
+        factory(\App\Skill::class)->create(['name' => 'OOP']);
+        factory(\App\Skill::class)->create(['name' => 'TDD']);
+    }
+
+datbase seeder:
+
+
+public function run()
+    {
+        $this->truncateTables([
+            'users',
+            'skills',
+            'professions'
+        ]);
+
+        $this->call([
+            ProfessionSeeder::class,
+            SkillSeeder::class,
+            UserSeeder::class,
+        ]);
+    }

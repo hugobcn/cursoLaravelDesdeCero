@@ -1,0 +1,139 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/laravel_dusk
+https://styde.net/introduccion-a-laravel-dusk/
+https://styde.net/laravel-dusk/
+https://laravel-docs.readthedocs.io/en/stable/dusk/
+https://github.com/laravel/dusk/blob/6.x/CHANGELOG.md
+https://laravel.com/docs/7.x/dusk
+https://laravel.com/docs/7.x/dusk#migrations
+
+subir a git local:
+
+$ git init
+$ git add .                          
+$ git status
+$ git commit -m  "laravelDesde0V00
+$ clear
+------------------------------------------------
+
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+> t  --stop-on-failure  (para test en el primer error)
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+-------------probelmas instlar larvel dusk----------------
+
+sudo apt remove libcurl4
+sudo apt install curl
+
+sudo apt-get install php-curl
+
+composer require --dev laravel/dusk
+
+php artisan dusk
+
+https://laravel.com/docs/7.x/dusk#installation
+
+sudo apt-get install chromium-chromedriver
+
+wget -c https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O chrome64.deb
+
+sudo dpkg -i chrome64.deb
+------------------------------------------------
+implode — Une elementos de un array en un string
+
+$array = array('apellido', 'email', 'teléfono');
+$separado_por_comas = implode(",", $array);
+
+echo $separado_por_comas; // apellido,email,teléfono
+------------------Refresdate Test-------
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class UsersModuleTest extends TestCase {
+
+    use RefreshDatabase;
+
+----------------$this->assertDatabaseEmpty('users');--------------
+
+
+    Agregar el paquete con composer require --dev laravel/dusk
+    Crear los directorios de Dusk en tests/Browser con php artisan dusk:install
+    Asegúrate de configurar APP_URL en el archivo de entorno .env y que la dirección web sea exactamente la misma que usas para navegar tu proyecto en tu máquina local.
+    Crea un archivo de entorno propio para Dusk, copiando el archivo .env y pegándolo en el mismo directorio principal con el nombre .env.dusk.local
+    Crea una nueva base de datos para usarla exclusivamente para ejecutar las pruebas de Dusk, puedes usar la consola, phpmyadmin, Sequel Pro, etc. para crear la base de datos.
+    En el archivo de entorno de Dusk .env.dusk.local reemplaza el nombre de la base de datos en la llave DB_DATABASE.
+
+
+NO
+
+Nunca instales ni uses Dusk en ambiente de producción.
+Si intentas usar el trait RefreshDatabase con Laravel Dusk no obtendrás el 
+resultado esperado y podrías obtener falsos positivos al ejecutar tus pruebas.
+tendremos que hacer uso del trait DatabaseMigrations.
+
+--------------
+
+//sudo gedit /etc/php/7.4/cli/php.ini
+sudo apt-get install libapache2-mod-php7.4 php7.2-mbstring php7.4-xmlrpc php7.4-soap php7.4-gd php7.4-xml php7.4-cli php7.4-zip
+After which you would run the command (sudo composer global require "laravel/installer")
+enable:
+
+ - /etc/php/7.4/cli/php.ini
+    - /etc/php/7.4/cli/conf.d/10-mysqlnd.ini
+    - /etc/php/7.4/cli/conf.d/10-opcache.ini
+    - /etc/php/7.4/cli/conf.d/10-pdo.ini
+    - /etc/php/7.4/cli/conf.d/15-xml.ini
+    - /etc/php/7.4/cli/conf.d/20-bcmath.ini
+    - /etc/php/7.4/cli/conf.d/20-calendar.ini
+    - /etc/php/7.4/cli/conf.d/20-ctype.ini
+    - /etc/php/7.4/cli/conf.d/20-dom.ini
+    - /etc/php/7.4/cli/conf.d/20-exif.ini
+    - /etc/php/7.4/cli/conf.d/20-ffi.ini
+    - /etc/php/7.4/cli/conf.d/20-fileinfo.ini
+    - /etc/php/7.4/cli/conf.d/20-ftp.ini
+    - /etc/php/7.4/cli/conf.d/20-gd.ini
+    - /etc/php/7.4/cli/conf.d/20-gettext.ini
+    - /etc/php/7.4/cli/conf.d/20-iconv.ini
+    - /etc/php/7.4/cli/conf.d/20-json.ini
+    - /etc/php/7.4/cli/conf.d/20-mbstring.ini
+    - /etc/php/7.4/cli/conf.d/20-mysqli.ini
+    - /etc/php/7.4/cli/conf.d/20-pdo_mysql.ini
+    - /etc/php/7.4/cli/conf.d/20-phar.ini
+    - /etc/php/7.4/cli/conf.d/20-posix.ini
+    - /etc/php/7.4/cli/conf.d/20-readline.ini
+    - /etc/php/7.4/cli/conf.d/20-shmop.ini
+    - /etc/php/7.4/cli/conf.d/20-simplexml.ini
+    - /etc/php/7.4/cli/conf.d/20-sockets.ini
+    - /etc/php/7.4/cli/conf.d/20-sysvmsg.ini
+    - /etc/php/7.4/cli/conf.d/20-sysvsem.ini
+    - /etc/php/7.4/cli/conf.d/20-sysvshm.ini
+    - /etc/php/7.4/cli/conf.d/20-tokenizer.ini
+    - /etc/php/7.4/cli/conf.d/20-xmlreader.ini
+    - /etc/php/7.4/cli/conf.d/20-xmlwriter.ini
+    - /etc/php/7.4/cli/conf.d/20-xsl.ini
+    - /etc/php/7.4/cli/conf.d/20-zip.ini
+
+
+-------
+
+ENV. :
+APP_URL=http://wwww.laravel-desde0.es/
+
+--------
+
+copiar env. s .env.dusk.local
+
+crear base de datos solo para dusk
+
+ponerla en .env.dusk.local:
+
+.env.dusk.local
+
+https://laravel.com/docs/7.x/dusk#migrations
+
+class ExampleTest extends DuskTestCase
+{
+    // no utilizar el trait RefreshDatabase en test dusk
+    use DatabaseMigrations;
+}

@@ -1,0 +1,332 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/laravel_dusk2
+https://github.com/estebannovo/curso_styde/tree/Actividad-2/tests/Browser/Admin
+https://styde.net/introduccion-a-laravel-dusk/
+https://styde.net/laravel-dusk/
+https://laravel-docs.readthedocs.io/en/stable/dusk/
+https://github.com/laravel/dusk/blob/6.x/CHANGELOG.md
+https://laravel.com/docs/7.x/dusk
+https://laravel.com/docs/7.x/dusk#migrations
+
+subir a git local:
+
+$ git init
+$ git add .                          
+$ git status
+$ git commit -m  "laravelDesde0V00
+$ clear
+------------------------------------------------
+
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+> t  --stop-on-failure  (para test en el primer error)
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+-------------probelmas instlar larvel dusk----------------
+
+sudo apt remove libcurl4
+sudo apt install curl
+
+sudo apt-get install php-curl
+
+composer require --dev laravel/dusk
+
+php artisan dusk
+
+https://laravel.com/docs/7.x/dusk#installation
+
+sudo apt-get install chromium-chromedriver
+
+wget -c https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O chrome64.deb
+
+sudo dpkg -i chrome64.deb
+------------------------------------------------
+implode — Une elementos de un array en un string
+
+$array = array('apellido', 'email', 'teléfono');
+$separado_por_comas = implode(",", $array);
+
+echo $separado_por_comas; // apellido,email,teléfono
+------------------Refresdate Test-------
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class UsersModuleTest extends TestCase {
+
+    use RefreshDatabase;
+
+------end-to-end-con-laravel-dusk-----
+
+php artisan dusk:make Admin/CreateUserTest
+
+Para poder llamar al método visit y otros métodos de Laravel Dusk 
+necesitamos una instancia de la clase browser y esta lo obtenemos llamando al método browse
+
+$this->browse(function ($browser, $browser2, $browser3) {
+    $browser->visit('usuarios/nuevo')
+        ->assertSeeIn('h4', 'Crear usuario');
+});
+
+
+!!!!!Recuerda incluir el trait DatabaseMigrations!!!!
+
+
+ type para los campos de texto.
+select para los campos de selección.
+check para los cambios de tipo checkbox.
+radio para los cambios de tipo radio.
+press para presionar un botón
+
+método press simplemente pasamos el texto del botón que queremos presionar:
+
+function a_user_can_be_created()
+{
+    $profession = factory(Profession::class)->create();
+    $skillA = factory(Skill::class)->create();
+    $skillB = factory(Skill::class)->create();
+ 
+    $this->browse(function (Browser $browser) use ($profession, $skillA, $skillB) {
+        $browser->visit('usuarios/nuevo')
+            ->type('name', 'Duilio')
+            ->type('email', 'duilio@styde.net')
+            ->type('password', 'laravel')
+            ->type('bio', 'Programador')
+            ->select('profession_id', $profession->id)
+            ->type('twitter', 'https://twitter.com/sileence') 
+            ->check("skills[{$skillA->id}]")
+            ->check("skills[{$skillB->id}]")
+            ->radio('role', 'user')
+            ->press('Crear usuario')     
+    });
+}
+
+comprobar que el usuario se encontrará dentro del listado de usuarios, luego de 
+presionar el botón, si usamos assertPathIs y que dentro de este listado podemos 
+ver el nombre y el correo del usuario creado con assertSee:
+
+function a_user_can_be_created()
+{   
+    //...
+ 
+    $this->browse(function (Browser $browser) use ($profession, $skillA, $skillB) {
+        $browser->visit('usuarios/nuevo')
+            // ...
+            ->press('Crear usuario')
+            ->assertPathIs('/usuarios')
+            ->assertSee('Duilio');
+            ->assertSee('duilio@styde.net');
+    });
+}
+
+------CreateUserTest----
+
+use App\Profession;
+use App\Skill;
+use App\User;
+use Tests\DuskTestCase;
+use Laravel\Dusk\Browser;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+
+class CreateUserTest extends DuskTestCase
+{
+    use DatabaseMigrations;
+
+    /** @test */
+    function a_user_can_be_created()
+    {
+        $profession = factory(Profession::class)->create();
+
+        $skillA = factory(Skill::class)->create();
+        $skillB = factory(Skill::class)->create();
+
+        $userName = 'Duilio';
+        $userEmail = 'duilio@styde.net';
+        $userPassword = 'laravel';
+        $userBiography = 'Programador';
+        $userTwitterAccount = 'https://twitter.com/sileence';
+
+        $this->browse(function(Browser $browser) use ($profession, $skillA, $skillB, $userName, $userEmail, $userPassword, $userBiography, $userTwitterAccount) {
+            $browser->visit('/usuarios/nuevo')
+                ->type('name', $userName)
+                ->type('email', $userEmail)
+                ->type('password', $userPassword)
+                ->type('bio', $userBiography)
+                ->select('profession_id', $profession->id)
+                ->type('twitter', $userTwitterAccount)
+                ->check("skills[{$skillA->id}]")
+                ->check("skills[{$skillB->id}]")
+                //->radio('role', 'user')
+                ->press('Crear usuario')
+                ->assertPathIs('/usuarios')
+                ->assertSee($userName)
+                ->assertSee($userEmail);
+        });
+
+        $this->assertCredentials([
+            'name'=> $userName,
+            'email'=> $userEmail,
+            'password' => $userPassword,
+            'role' => 'user',
+        ]);
+
+        $user = User::findByEmail($userEmail);
+        $this->assertDatabaseHas('user_profiles', [
+            'bio' => $userBiography,
+            'twitter' => $userTwitterAccount,
+            'user_id' => $user->id,
+            'profession_id' => $profession->id,
+        ]);
+
+        $this->assertDatabaseHas('user_skill', [
+            'user_id' => $user->id,
+            'skill_id' => $skillA->id,
+        ]);
+
+        $this->assertDatabaseHas('user_skill', [
+            'user_id' => $user->id,
+            'skill_id' => $skillB->id,
+        ]);
+    }
+}
+
+
+----------DeleteUserTest.php------------
+
+use Tests\DuskTestCase;
+use Laravel\Dusk\Browser;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Tests\User\UserHelper;
+
+class DeleteUserTest extends DuskTestCase
+{
+    use DatabaseMigrations;
+
+    use UserHelper;
+
+    /**
+     * @test
+     */
+    public function it_can_delete_a_user()
+    {
+        //First of all I have to create a new user to try to delete it.
+        $this->loadNewUser();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $this->user->id,
+            'name' => $this->userData['name'],
+            'email' => $this->userData['email'],
+        ]);
+
+        $this->assertDatabaseHas('user_profiles', [
+            'bio' => $this->userData['bio'],
+            'twitter' => $this->userData['twitter'],
+            'user_id' => $this->user->id,
+            'profession_id' => $this->profession->id,
+        ]);
+
+        $this->browse(function (Browser $browser){
+            $browser->visit('/usuarios')
+                ->assertSee($this->userData['name'])
+                ->assertSee($this->userData['email'])
+                ->press("@delete-{$this->user->id}")
+                ->assertPathIs('/usuarios')
+                ->assertDontSee($this->userData['name'])
+                ->assertDontSee($this->userData['email']);
+        });
+
+        $this->assertDatabaseMissing('users', [
+            'id' => $this->user->id,
+            'name' => $this->userData['name'],
+            'email' => $this->userData['email'],
+        ]);
+
+        $this->assertDatabaseMissing('user_profiles', [
+            'bio' => $this->userData['bio'],
+            'twitter' => $this->userData['twitter'],
+            'user_id' => $this->user->id,
+            'profession_id' => $this->profession->id,
+        ]);
+    }
+}
+
+------------ListUserTest.php-----------------
+
+namespace Tests\Browser\Admin;
+
+use Tests\DuskTestCase;
+use Laravel\Dusk\Browser;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+
+class ListUserTest extends DuskTestCase
+{
+    use DatabaseMigrations;
+
+    /**
+     * @test
+     */
+    public function it_can_see_user_list()
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/usuarios')
+                ->assertSeeIn('h1', 'Listado de usuarios')
+                ->assertSee('Nuevo usuario');
+        });
+    }
+}
+
+--------UpdateUserTest.php ------------
+
+use Tests\DuskTestCase;
+use Laravel\Dusk\Browser;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Tests\User\UserHelper;
+
+class UpdateUserTest extends DuskTestCase
+{
+    use DatabaseMigrations;
+    use UserHelper;
+
+    /**
+     * @test
+     */
+    public function it_can_edit_user()
+    {
+        //Firstly I have to create a new user to can update it later
+        $this->loadNewUser();
+
+        $this->browse(function (Browser $browser) {
+            $browser->visit("/usuarios/{$this->user->id}/editar")
+                ->assertValue('@name', $this->userData['name'])
+                ->assertValue('@email', $this->userData['email'])
+                ->assertSeeIn('@update', 'Actualizar usuario')
+                ->assertSeeIn('p', 'Regresar al listado de usuarios')
+                ->type('password', $this->userData['password'])
+                ->press('Actualizar usuario')
+                ->assertPathIs("/usuarios/{$this->user->id}")
+                ->assertSeeIn('h1', "Usuario #{$this->user->id}")
+                ->assertSeeIn('p', "Nombre del usuario: {$this->userData['name']}")
+                ->assertSeeIn('@email', "Correo electrónico: {$this->userData['email']}");;
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function the_field_name_its_required()
+    {
+        $this->loadNewUser();
+
+        $this->browse(function (Browser $browser) {
+            $browser->visit("/usuarios/{$this->user->id}/editar")
+                ->assertValue('@name', $this->userData['name'])
+                ->assertValue('@email', $this->userData['email'])
+                ->assertSeeIn('@update', 'Actualizar usuario')
+                ->assertSeeIn('p', 'Regresar al listado de usuarios')
+                ->type('password', $this->userData['password'])
+                ->type('name', '')
+                ->press('Actualizar usuario')
+                ->assertPathIs("/usuarios/{$this->user->id}/editar")
+                ->assertSeeIn('.alert.alert-danger', "The field name is required")
+                ->assertSeeIn('h1', "Editar usuario");
+        });
+    }

@@ -1,0 +1,26 @@
+https://www.drauta.com/gestion-de-roles-en-laravel
+https://programacionymas.com/blog/restringir-acceso-solo-administradores-laravel-usando-middlewares
+https://medium.com/@cvallejo/roles-usuarios-laravel-2e1c6123ad
+https://medium.com/@cvallejo/autenticaci%C3%B3n-de-usuarios-y-roles-en-laravel-5-5-97ab59552d91
+https://styde.net/roles-y-permisos-con-spatie-laravel-permission/ *****
+
+Route::group(['middleware' => ['auth','admin']], function() {
+
+Middleware will look something like
+
+public function handle($request, Closure $next) {
+     if (Auth::user()->role == "admin") {
+       return $next($request);
+     } else {
+       return redirect("/")->withMyerror("You are not authorized for this action");
+     }
+}
+
+
+
+
+rol de administrador puedan cambiar el rol de un usuario
+
+Ejecute el comando php artisan make:auth Para crear el sistema login de laravel
+2- En el controlador de usuarios en el metodo create cree una variable $isAdmin = Auth::user()->isAdmin(); la envie a la vista con compact
+3- En la vista antes del h5 rol puse un @if($isAdmin) y listo

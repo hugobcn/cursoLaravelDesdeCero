@@ -1,0 +1,770 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/move_tests
+https://github.com/nunomaduro/collision/blob/stable/CHANGELOG.md
+
+subir a git local:
+
+$ git init
+$ git add .                          
+$ git status
+$ git commit -m  "laravelDesde0V00
+$ clear
+------------------------------------------------
+
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+> t  --stop-on-failure  (para test en el primer error)
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+
+------------------------------------------------
+implode — Une elementos de un array en un string
+
+$array = array('apellido', 'email', 'teléfono');
+$separado_por_comas = implode(",", $array);
+
+echo $separado_por_comas; // apellido,email,teléfono
+------------------Refresdate Test-------
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class UsersModuleTest extends TestCase {
+
+    use RefreshDatabase;
+
+----------------$this->assertDatabaseEmpty('users');--------------
+
+php artisan make:test ClaseDePrueba
+
+A cada prueba:
+
+public function setUp()
+    {
+        parent::setUp();
+ 
+        $this->withoutExceptionHandling();
+    }
+Optimizar la velocidad en que se ejecutan las pruebas:
+
+Alternativamente puedes generar una clave en Tinker usando: bcrypt('clave_aqui') 
+copiar la cadena generada y agregarla a UserFactory
+
+$factory->define(App\User::class, function (Faker $faker) {
+    return [
+        //...
+        'password' => '$2y$10$ZwGRn793jmScCZ8c9s3mR.6YIfCcVGghmAf3PGgf5xiZR5lvTYIey',
+        //...
+    ];
+});
+
+\Illuminate\Support\Facades\Hash::setRounds(4); en el trait CreatesApplication
+
+Instala o actualiza el paquete collision: composer require nunomaduro/collision --dev, asegúrate de estar utilizando la versión 2 en adelante.
+
+Agrega las siguientes líneas a phpunit.xml:
+
+<listeners>
+        <listener class="NunoMaduro\Collision\Adapters\Phpunit\Listener" />
+    </listeners>
+
+-----------------------------------ejejmplo-------------
+
+Collsion sea vea mejor:
+
+composer require nunomaduro/collision --dev
+
+phpunit.xml: <listeners>
+        <listener class="NunoMaduro\Collision\Adapters\Phpunit\Listener" />
+    </listeners>
+
+composer.json: "require-dev": {
+        "filp/whoops": "~2.0",
+        "nunomaduro/collision": "~2.0",
+        "fzaninotto/faker": "~1.4",
+        "mockery/mockery": "~1.0",
+        "phpunit/phpunit": "~7.0",
+        "symfony/thanks": "^1.0"
+    },
+
+test case:
+
+namespace Tests;
+
+use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+
+abstract class TestCase extends BaseTestCase
+{
+    use CreatesApplication, TestHelpers;
+
+    protected $defaultData = [];
+
+    public function setUp()
+    {
+        parent::setUp();
+
+        $this->withoutExceptionHandling();
+    }
+}
+
+TestHelpers:
+
+
+trait TestHelpers
+{
+    protected function assertDatabaseEmpty($table, $connection = null)
+    {
+        $total = $this->getConnection($connection)->table($table)->count();
+        $this->assertSame(0, $total, sprintf(
+            "Failed asserting the table [%s] is empty. %s %s found.", $table, $total, str_plural('row', $total)
+        ));
+    }
+
+    protected function withData(array $custom = [])
+    {
+        return array_merge($this->defaultData(), $custom);
+    }
+
+    protected function defaultData()
+    {
+        return $this->defaultData;
+    }
+}
+
+CreateAppliction: 
+
+use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Support\Facades\Hash;
+
+trait CreatesApplication
+{
+    /**
+     * Creates the application.
+     *
+     * @return \Illuminate\Foundation\Application
+     */
+    public function createApplication()
+    {
+        $app = require __DIR__.'/../bootstrap/app.php';
+
+        $app->make(Kernel::class)->bootstrap();
+
+        Hash::setRounds(4);
+
+        return $app;
+    }
+}
+
+
+
+php artisab thinker
+bycrypt('xxx');
+copiar resultado y pegar  en factory
+
+ddbb/factory/userFacrory:
+
+
+
+$factory->define(App\User::class, function (Faker $faker) {
+    return [
+        'name' => $faker->name,
+        'email' => $faker->unique()->safeEmail,
+        'password' => '$2y$10$ZwGRn793jmScCZ8c9s3mR.6YIfCcVGghmAf3PGgf5xiZR5lvTYIey',
+        'remember_token' => str_random(10),
+        'role' => 'user',
+    ];
+});
+
+
+---testst/feaure/admin----
+
+CreateUsersTest:
+
+namespace Tests\Feature\Admin;
+
+use Tests\TestCase;
+use App\{Profession, Skill, User};
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class CreateUsersTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected $defaultData = [
+        'name' => 'Duilio',
+        'email' => 'duilio@styde.net',
+        'password' => '123456',
+        'bio' => 'Programador de Laravel y Vue.js',
+        'profession_id' => '',
+        'twitter' => 'https://twitter.com/sileence',
+        'role' => 'user',
+    ];
+
+    /** @test */
+    function it_loads_the_new_users_page()
+    {
+        $profession = factory(Profession::class)->create();
+
+        $skillA = factory(Skill::class)->create();
+        $skillB = factory(Skill::class)->create();
+
+        $this->get('/usuarios/nuevo')
+            ->assertStatus(200)
+            ->assertSee('Crear usuario')
+            ->assertViewHas('professions', function ($professions) use ($profession) {
+                return $professions->contains($profession);
+            })
+            ->assertViewHas('skills', function ($skills) use ($skillA, $skillB) {
+                return $skills->contains($skillA) && $skills->contains($skillB);
+            });
+    }
+
+    /** @test */
+    function it_creates_a_new_user()
+    {
+        $profession = factory(Profession::class)->create();
+
+        $skillA = factory(Skill::class)->create();
+        $skillB = factory(Skill::class)->create();
+        $skillC = factory(Skill::class)->create();
+
+        $this->post('/usuarios/', $this->withData([
+            'skills' => [$skillA->id, $skillB->id],
+            'profession_id' => $profession->id,
+        ]))->assertRedirect('usuarios');
+
+        $this->assertCredentials([
+            'name' => 'Duilio',
+            'email' => 'duilio@styde.net',
+            'password' => '123456',
+            'role' => 'user',
+        ]);
+
+        $user = User::findByEmail('duilio@styde.net');
+
+        $this->assertDatabaseHas('user_profiles', [
+            'bio' => 'Programador de Laravel y Vue.js',
+            'twitter' => 'https://twitter.com/sileence',
+            'user_id' => $user->id,
+            'profession_id' => $profession->id,
+        ]);
+
+        $this->assertDatabaseHas('user_skill', [
+            'user_id' => $user->id,
+            'skill_id' => $skillA->id,
+        ]);
+
+        $this->assertDatabaseHas('user_skill', [
+            'user_id' => $user->id,
+            'skill_id' => $skillB->id,
+        ]);
+
+        $this->assertDatabaseMissing('user_skill', [
+            'user_id' => $user->id,
+            'skill_id' => $skillC->id,
+        ]);
+    }
+
+    /** @test */
+    function the_twitter_field_is_optional()
+    {
+        $this->post('/usuarios/', $this->withData([
+            'twitter' => null,
+        ]))->assertRedirect('usuarios');
+
+        $this->assertCredentials([
+            'name' => 'Duilio',
+            'email' => 'duilio@styde.net',
+            'password' => '123456',
+        ]);
+
+        $this->assertDatabaseHas('user_profiles', [
+            'bio' => 'Programador de Laravel y Vue.js',
+            'twitter' => null,
+            'user_id' => User::findByEmail('duilio@styde.net')->id,
+        ]);
+    }
+
+    /** @test */
+    function the_role_field_is_optional()
+    {
+        $this->post('/usuarios/', $this->withData([
+            'role' => null,
+        ]))->assertRedirect('usuarios');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'duilio@styde.net',
+            'role' => 'user',
+        ]);
+    }
+
+    /** @test */
+    function the_role_must_be_valid()
+    {
+        $this->handleValidationExceptions();
+
+        $this->post('/usuarios/', $this->withData([
+            'role' => 'invalid-role',
+        ]))->assertSessionHasErrors('role');
+
+        $this->assertDatabaseEmpty('users');
+    }
+
+    /** @test */
+    function the_profession_id_field_is_optional()
+    {
+        $this->post('/usuarios/', $this->withData([
+            'profession_id' => '',
+        ]))->assertRedirect('usuarios');
+
+        $this->assertCredentials([
+            'name' => 'Duilio',
+            'email' => 'duilio@styde.net',
+            'password' => '123456',
+        ]);
+
+        $this->assertDatabaseHas('user_profiles', [
+            'bio' => 'Programador de Laravel y Vue.js',
+            'user_id' => User::findByEmail('duilio@styde.net')->id,
+            'profession_id' => null,
+        ]);
+    }
+
+    /** @test */
+    function the_user_is_redirected_to_the_previous_page_when_the_validation_fails()
+    {
+        $this->handleValidationExceptions();
+
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/', [])
+            ->assertRedirect('usuarios/nuevo');
+
+        $this->assertDatabaseEmpty('users');
+    }
+
+    /** @test */
+    function the_name_is_required()
+    {
+        $this->handleValidationExceptions();
+
+        $this->post('/usuarios/', $this->withData([
+                'name' => '',
+            ]))
+            ->assertSessionHasErrors(['name' => 'El campo nombre es obligatorio']);
+
+        $this->assertDatabaseEmpty('users');
+    }
+
+    /** @test */
+    function the_email_is_required()
+    {
+        $this->handleValidationExceptions();
+
+        $this->post('/usuarios/', $this->withData([
+                'email' => '',
+            ]))
+            ->assertSessionHasErrors(['email']);
+
+        $this->assertDatabaseEmpty('users');
+    }
+
+    /** @test */
+    function the_email_must_be_valid()
+    {
+        $this->handleValidationExceptions();
+
+        $this->post('/usuarios/', $this->withData([
+                'email' => 'correo-no-valido',
+            ]))
+            ->assertSessionHasErrors(['email']);
+
+        $this->assertDatabaseEmpty('users');
+    }
+
+    /** @test */
+    function the_email_must_be_unique()
+    {
+        $this->handleValidationExceptions();
+
+        factory(User::class)->create([
+            'email' => 'duilio@styde.net'
+        ]);
+
+        $this->post('/usuarios/', $this->withData([
+                'email' => 'duilio@styde.net',
+            ]))
+            ->assertSessionHasErrors(['email']);
+
+        $this->assertEquals(1, User::count());
+    }
+
+    /** @test */
+    function the_password_is_required()
+    {
+        $this->handleValidationExceptions();
+
+        $this->post('/usuarios/', $this->withData([
+                'password' => '',
+            ]))
+            ->assertSessionHasErrors(['password']);
+
+        $this->assertDatabaseEmpty('users');
+    }
+
+    /** @test */
+    function the_profession_must_be_valid()
+    {
+        $this->handleValidationExceptions();
+
+        $this->post('/usuarios/', $this->withData([
+                'profession_id' => '999'
+            ]))
+            ->assertSessionHasErrors(['profession_id']);
+
+        $this->assertDatabaseEmpty('users');
+    }
+
+    /** @test */
+    function only_not_deleted_professions_can_be_selected()
+    {
+        $deletedProfession = factory(Profession::class)->create([
+            'deleted_at' => now()->format('Y-m-d'),
+        ]);
+
+        $this->handleValidationExceptions();
+
+        $this->post('/usuarios/', $this->withData([
+                'profession_id' => $deletedProfession->id,
+            ]))
+            ->assertSessionHasErrors(['profession_id']);
+
+        $this->assertDatabaseEmpty('users');
+    }
+
+    /** @test */
+    function the_skills_must_be_an_array()
+    {
+        $this->handleValidationExceptions();
+
+        $this->post('/usuarios/', $this->withData([
+                'skills' => 'PHP, JS'
+            ]))
+            ->assertSessionHasErrors(['skills']);
+
+        $this->assertDatabaseEmpty('users');
+    }
+
+    /** @test */
+    function the_skills_must_be_valid()
+    {
+        $this->handleValidationExceptions();
+
+        $skillA = factory(Skill::class)->create();
+        $skillB = factory(Skill::class)->create();
+
+        $this->post('/usuarios/', $this->withData([
+                'skills' => [$skillA->id, $skillB->id + 1],
+            ]))
+            ->assertSessionHasErrors(['skills']);
+
+        $this->assertDatabaseEmpty('users');
+    }
+}
+
+
+DeleteUsersTest.php :
+
+namespace Tests\Feature\Admin;
+
+use App\User;
+use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class DeleteUsersTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /** @test */
+    function it_deletes_a_user()
+    {
+        $user = factory(User::class)->create();
+
+        $this->delete("usuarios/{$user->id}")
+            ->assertRedirect('usuarios');
+
+        $this->assertDatabaseEmpty('users');
+    }
+}
+
+
+ShowUsersTest:
+
+use App\User;
+use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class ShowUsersTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /** @test */
+    function it_displays_the_users_details()
+    {
+        $user = factory(User::class)->create([
+            'name' => 'Duilio Palacios'
+        ]);
+
+        $this->get("/usuarios/{$user->id}") // usuarios/5
+        ->assertStatus(200)
+            ->assertSee('Duilio Palacios');
+    }
+
+    /** @test */
+    function it_displays_a_404_error_if_the_user_is_not_found()
+    {
+        $this->withExceptionHandling();
+
+        $this->get('/usuarios/999')
+            ->assertStatus(404)
+            ->assertSee('Página no encontrada');
+    }
+}
+
+ListUsersTest.php:
+
+
+use App\User;
+use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class ListUsersTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /** @test */
+    function it_shows_the_users_list()
+    {
+        factory(User::class)->create([
+            'name' => 'Joel'
+        ]);
+
+        factory(User::class)->create([
+            'name' => 'Ellie',
+        ]);
+
+        $this->get('/usuarios')
+            ->assertStatus(200)
+            ->assertSee('Listado de usuarios')
+            ->assertSee('Joel')
+            ->assertSee('Ellie');
+    }
+
+    /** @test */
+    function it_shows_a_default_message_if_the_users_list_is_empty()
+    {
+        $this->get('/usuarios')
+            ->assertStatus(200)
+            ->assertSee('No hay usuarios registrados.');
+    }
+}
+
+ShowUsersTest.php:
+
+
+namespace Tests\Feature\Admin;
+
+use App\User;
+use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class ShowUsersTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /** @test */
+    function it_displays_the_users_details()
+    {
+        $user = factory(User::class)->create([
+            'name' => 'Duilio Palacios'
+        ]);
+
+        $this->get("/usuarios/{$user->id}") // usuarios/5
+        ->assertStatus(200)
+            ->assertSee('Duilio Palacios');
+    }
+
+    /** @test */
+    function it_displays_a_404_error_if_the_user_is_not_found()
+    {
+        $this->withExceptionHandling();
+
+        $this->get('/usuarios/999')
+            ->assertStatus(404)
+            ->assertSee('Página no encontrada');
+    }
+}
+
+
+UpdateUsersTest.php: 
+
+
+namespace Tests\Feature\Admin;
+
+use App\User;
+use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class UpdateUsersTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected $defaultData = [
+        'name' => 'Duilio',
+        'email' => 'duilio@styde.net',
+        'password' => '123456',
+        'profession_id' => '',
+        'bio' => 'Programador de Laravel y Vue.js',
+        'twitter' => 'https://twitter.com/sileence',
+        'role' => 'user',
+    ];
+
+    /** @test */
+    function it_loads_the_edit_user_page()
+    {
+        $user = factory(User::class)->create();
+
+        $this->get("/usuarios/{$user->id}/editar") // usuarios/5/editar
+        ->assertStatus(200)
+            ->assertViewIs('users.edit')
+            ->assertSee('Editar usuario')
+            ->assertViewHas('user', function ($viewUser) use ($user) {
+                return $viewUser->id === $user->id;
+            });
+    }
+
+    /** @test */
+    function it_updates_a_user()
+    {
+        $user = factory(User::class)->create();
+
+        $this->put("/usuarios/{$user->id}", [
+            'name' => 'Duilio',
+            'email' => 'duilio@styde.net',
+            'password' => '123456'
+        ])->assertRedirect("/usuarios/{$user->id}");
+
+        $this->assertCredentials([
+            'name' => 'Duilio',
+            'email' => 'duilio@styde.net',
+            'password' => '123456',
+        ]);
+    }
+
+    /** @test */
+    function the_name_is_required()
+    {
+        $this->handleValidationExceptions();
+
+        $user = factory(User::class)->create();
+
+        $this->from("usuarios/{$user->id}/editar")
+            ->put("usuarios/{$user->id}", [
+                'name' => '',
+                'email' => 'duilio@styde.net',
+                'password' => '123456'
+            ])
+            ->assertRedirect("usuarios/{$user->id}/editar")
+            ->assertSessionHasErrors(['name']);
+
+        $this->assertDatabaseMissing('users', ['email' => 'duilio@styde.net']);
+    }
+
+    /** @test */
+    function the_email_must_be_valid()
+    {
+        $this->handleValidationExceptions();
+
+        $user = factory(User::class)->create();
+
+        $this->from("usuarios/{$user->id}/editar")
+            ->put("usuarios/{$user->id}", [
+                'name' => 'Duilio Palacios',
+                'email' => 'correo-no-valido',
+                'password' => '123456'
+            ])
+            ->assertRedirect("usuarios/{$user->id}/editar")
+            ->assertSessionHasErrors(['email']);
+
+        $this->assertDatabaseMissing('users', ['name' => 'Duilio Palacios']);
+    }
+
+    /** @test */
+    function the_email_must_be_unique()
+    {
+        $this->handleValidationExceptions();
+
+        factory(User::class)->create([
+            'email' => 'existing-email@example.com',
+        ]);
+
+        $user = factory(User::class)->create([
+            'email' => 'duilio@styde.net'
+        ]);
+
+        $this->from("usuarios/{$user->id}/editar")
+            ->put("usuarios/{$user->id}", [
+                'name' => 'Duilio',
+                'email' => 'existing-email@example.com',
+                'password' => '123456'
+            ])
+            ->assertRedirect("usuarios/{$user->id}/editar")
+            ->assertSessionHasErrors(['email']);
+
+        //
+    }
+
+    /** @test */
+    function the_users_email_can_stay_the_same()
+    {
+        $user = factory(User::class)->create([
+            'email' => 'duilio@styde.net'
+        ]);
+
+        $this->from("usuarios/{$user->id}/editar")
+            ->put("usuarios/{$user->id}", [
+                'name' => 'Duilio Palacios',
+                'email' => 'duilio@styde.net',
+                'password' => '12345678'
+            ])
+            ->assertRedirect("usuarios/{$user->id}"); // (users.show)
+
+        $this->assertDatabaseHas('users', [
+            'name' => 'Duilio Palacios',
+            'email' => 'duilio@styde.net',
+        ]);
+    }
+
+    /** @test */
+    function the_password_is_optional()
+    {
+        $oldPassword = 'CLAVE_ANTERIOR';
+
+        $user = factory(User::class)->create([
+            'password' => bcrypt($oldPassword)
+        ]);
+
+        $this->from("usuarios/{$user->id}/editar")
+            ->put("usuarios/{$user->id}", [
+                'name' => 'Duilio',
+                'email' => 'duilio@styde.net',
+                'password' => ''
+            ])
+            ->assertRedirect("usuarios/{$user->id}"); // (users.show)
+
+        $this->assertCredentials([
+            'name' => 'Duilio',
+            'email' => 'duilio@styde.net',
+            'password' => $oldPassword // VERY IMPORTANT!
+        ]);
+    }
+}

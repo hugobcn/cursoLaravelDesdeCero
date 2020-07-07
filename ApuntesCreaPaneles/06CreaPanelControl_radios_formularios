@@ -1,0 +1,570 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/radios
+https://styde.net/uso-de-las-directivas-de-autorizacion-can-cannot-y-elsecan-en-blade/
+https://styde.net/nueva-sintaxis-para-las-reglas-de-validacion-dimensions-exists-unique-in-y-not_in-en-laravel-5-3/
+
+subir a git local:
+
+$ git init
+$ git add .                          
+$ git status
+$ git commit -m  "laravelDesde0V00
+$ clear
+------------------------------------------------
+
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+> t  --stop-on-failure  (para test en el primer error)
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+
+------------------------------------------------
+implode — Une elementos de un array en un string
+
+$array = array('apellido', 'email', 'teléfono');
+$separado_por_comas = implode(",", $array);
+
+echo $separado_por_comas; // apellido,email,teléfono
+------------------Refresdate Test-------
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class UsersModuleTest extends TestCase {
+
+    use RefreshDatabase;
+
+----------------$this->assertDatabaseEmpty('users');--------------
+
+Utilizando el helper trans podemos obtener una traducción. Pasamos como /
+argumento el nombre del archivo que creamos en resources/lang/en
+
+@foreach(trans('users.roles') as $role => $name)
+    ...
+@endforeach
+
+pasar los roles desde el controlador:
+
+public function create()
+{
+    $roles = trans('users.roles');
+ 
+    return view ('users.create', compact('professions', 'skills', 'roles'));
+}
+
+
+@foreach($roles as $role => $name)
+    ...
+@endforeach
+
+
+<input class="form-check-input"
+       ...
+       {{ old('role') == $role ? 'checked': '' }}>
+
+
+CreateUserRequest:
+
+return [
+    // ...
+    'role' => 'in:admin,user',
+]
+
+
+return [
+    // ...
+    'role' => [
+        'nullable',
+        Rule::in(['admin', 'user'])
+    ],
+]
+
+--------------create vs new en Eloquent------
+
+User::create([
+  // data
+]);
+
+crear un modelo sin persistirlo  inmediatamente puedes simplemente instanciarlo:
+
+ $user = new User([
+  //data aqui
+]);
+
+
+
+asignar atributos adicionales y puedes persistirlo cuando quieras usando save:
+
+// crear usuario pero sin guardarlo en la DB
+$user = new User;
+ 
+// guardar en la base de datos
+$user->save();
+
+
+----ejemplo----
+
+vista:
+
+<h5 class="mt-3">Rol</h5>
+
+                @foreach($roles as $role => $name)
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input"
+                           type="radio"
+                           name="role"
+                           id="role_{{ $role }}"
+                           value="{{ $role }}"
+                           {{ old('role') == $role ? 'checked' : '' }}>
+                    <label class="form-check-label" for="role_{{ $role }}">{{ $name }}</label>
+                </div>
+                @endforeach
+
+ressouces/lang/en/users:
+
+return [
+    'roles' => ['admin' => 'Admin', 'user' => 'Usuario'],
+];
+
+user controller:
+
+public function create()
+    {
+        $professions = Profession::orderBy('title', 'ASC')->get();
+        $skills = Skill::orderBy('name', 'ASC')->get();
+        $roles = trans('users.roles');
+
+        return view('users.create', compact('professions', 'skills', 'roles'));
+    }
+
+Role model:
+
+namespace App;
+
+class Role
+{
+    public static function getList()
+    {
+        return ['admin', 'user'];
+    }
+}
+
+user model:
+
+ public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+
+app/http/request/createUserResquest:
+
+public function rules()
+    {
+        return [
+            'name' => 'required',
+            'email' => ['required', 'email', 'unique:users,email'],
+            'password' => 'required',
+            'role' => ['nullable', Rule::in(Role::getList())],
+            'bio' => 'required',
+            'twitter' => ['nullable', 'present', 'url'],
+            'profession_id' => [
+                'nullable', 'present',
+                Rule::exists('professions', 'id')->whereNull('deleted_at')
+            ],
+            'skills' => [
+                'array',
+                Rule::exists('skills', 'id'),
+            ],
+        ];
+    }
+
+public function createUser()
+    {
+        DB::transaction(function () {
+            $data = $this->validated();
+
+            $user = new User([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => bcrypt($data['password']),
+            ]);
+
+            $user->role = $data['role'] ?? 'user';
+
+            $user->save();
+
+            $user->profile()->create([
+                'bio' => $data['bio'],
+                'twitter' => $data['twitter'],
+                'profession_id' => $data['profession_id'],
+            ]);
+
+            if (! empty ($data['skills'])) {
+                $user->skills()->attach($data['skills']);
+            }
+        });
+    }
+
+DDBB/seeds/UserSeeder:
+
+ public function run()
+    {
+        //$professions = DB::select('SELECT id FROM professions WHERE title = ?', ['Desarrollador back-end']);
+
+        $professionId = Profession::where('title', 'Desarrollador back-end')->value('id');
+
+        $user = factory(User::class)->create([
+            'name' => 'Duilio Palacios',
+            'email' => 'duilio@styde.net',
+            'password' => bcrypt('laravel'),
+            'role' => 'admin',
+        ]);
+
+        $user->profile()->create([
+            'bio' => 'Programador, profesor, editor, escritor, social media manager',
+            'profession_id' => $professionId,
+        ]);
+
+        factory(User::class, 29)->create()->each(function ($user) {
+            $user->profile()->create(
+                factory(\App\UserProfile::class)->raw()
+            );
+        });
+    }
+
+
+ddbb/factory/UserFactory:
+
+$factory->define(App\User::class, function (Faker $faker) {
+    static $password;
+
+    return [
+        'name' => $faker->name,
+        'email' => $faker->unique()->safeEmail,
+        'password' => $password ?: $password = bcrypt('secret'),
+        'remember_token' => str_random(10),
+        'role' => 'user',
+    ];
+});
+
+test:
+
+protected function getValidData(array $custom = [])
+    {
+        $this->profession = factory(Profession::class)->create();
+
+        return array_merge([
+            'name' => 'Duilio',
+            'email' => 'duilio@styde.net',
+            'password' => '123456',
+            'profession_id' => $this->profession->id,
+            'bio' => 'Programador de Laravel y Vue.js',
+            'twitter' => 'https://twitter.com/sileence',
+            'role' => 'user',
+        ], $custom);
+    }
+
+/** @test */
+    function test_it_creates_a_new_user()
+    {
+        $this->withoutExceptionHandling();
+
+        $skillA = factory(Skill::class)->create();
+        $skillB = factory(Skill::class)->create();
+        $skillC = factory(Skill::class)->create();
+
+        $this->post('/usuarios/', $this->getValidData([
+            'skills' => [$skillA->id, $skillB->id],
+        ]))->assertRedirect('usuarios');
+
+        $this->assertCredentials([
+            'name' => 'Duilio',
+            'email' => 'duilio@styde.net',
+            'password' => '123456',
+            'role' => 'user',
+        ]);
+
+        $user = User::findByEmail('duilio@styde.net');
+
+        $this->assertDatabaseHas('user_profiles', [
+            'bio' => 'Programador de Laravel y Vue.js',
+            'twitter' => 'https://twitter.com/sileence',
+            'user_id' => $user->id,
+            'profession_id' => $this->profession->id,
+        ]);
+
+        $this->assertDatabaseHas('user_skill', [
+            'user_id' => $user->id,
+            'skill_id' => $skillA->id,
+        ]);
+
+        $this->assertDatabaseHas('user_skill', [
+            'user_id' => $user->id,
+            'skill_id' => $skillB->id,
+        ]);
+
+        $this->assertDatabaseMissing('user_skill', [
+            'user_id' => $user->id,
+            'skill_id' => $skillC->id,
+        ]);
+    }
+
+    /** @test */
+    function test_the_role_field_is_optional()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->post('/usuarios/', $this->getValidData([
+            'role' => null,
+        ]))->assertRedirect('usuarios');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'duilio@styde.net',
+            'role' => 'user',
+        ]);
+    }
+
+    /** @test */
+    function test_the_role_must_be_valid()
+    {
+        $this->handleValidationExceptions();
+
+        $this->post('/usuarios/', $this->getValidData([
+            'role' => 'invalid-role',
+        ]))->assertSessionHasErrors('role');
+
+        $this->assertDatabaseEmpty('users');
+    }
+
+
+------admin solo admin----
+php artisan make:auth
+
+user control:
+public function create()
+    {
+        $professions = Profession::orderBy('title', 'ASC')->get();
+        $skills = Skill::orderBy('name', 'ASC')->get();
+
+        $roles = trans('users.roles');
+
+        $user = Auth::user();
+        $isAdmin = isset($user)?Auth::user()->isAdmin(): null;
+
+        return view('users.create', compact('professions', 'skills', 'roles', 'isAdmin'));
+    }
+
+@if($isAdmin)
+                    <h5 class="mt-4">Rol</h5>
+                    @foreach($roles as $role => $name)
+                        <div class="form-check form-check-inline">
+                            <input
+                                    class="form-check-input"
+                                    type="radio"
+                                    name="role"
+                                    id="role_{{$role}}"
+                                    value="{{$role}}"
+                                    {{$role == old('role')?'checked':''}}
+                            >
+                            <label class="form-check-label" for="role_{{$role}}">{{$name}}</label>
+                        </div>
+                    @endforeach
+                @endif@if($isAdmin)
+                    <h5 class="mt-4">Rol</h5>
+                    @foreach($roles as $role => $name)
+                        <div class="form-check form-check-inline">
+                            <input
+                                    class="form-check-input"
+                                    type="radio"
+                                    name="role"
+                                    id="role_{{$role}}"
+                                    value="{{$role}}"
+                                    {{$role == old('role')?'checked':''}}
+                            >
+                            <label class="form-check-label" for="role_{{$role}}">{{$name}}</label>
+                        </div>
+                    @endforeach
+                @endif
+--------------
+
+-----reglas-de-validacion-dimensions-exists-unique-in-y-not_in----
+
+'avatar' => 'dimensions:min_width=200,min_height=200'
+
+'post_feactured_id' => 'exists:posts,id
+
+'nickname' => "unique:user_profiles,nickname,{$profile->id}"
+
+'fruits'=> 'in:Apple,Banana,Orange
+
+dimension:
+
+Rule::dimensions([
+    max_width => 200,
+    max_height => 200
+])
+dimensions:
+
+'avatar' => Rule::dimensions()->maxWidth(200)->maxHeight(200
+
+'nickname' => Rule::unique('user_profiles')->ignore($profile->id)
+
+exists:
+
+'post_feactured_id' => Rule::exists('posts', 'id')
+
+'post_feactured_id' => Rule::exists('posts', 'id')->where('user_id', auth()->id)
+
+'post_feactured_id' => Rule::exists('posts', 'id')
+     ->where('user_id', auth()->id)
+     ->where('points', '>=', 50)
+
+Para in y not_in
+
+
+ restringir que el valor del campo a validar se encuentre en el listado permitido
+
+'fruits' => Rule::in(['Apple', 'Banana', 'Orange'])
+
+Rule::notIn([1, 2, 3, 4])
+
+----------------uso-de-las-directivas-de-autorizacion-can-cannot-y-elsecan-en-blade------------
+
+@can('update', $post)
+    <a href="/post/{{ $post->id }}/edit">Editar Post</a>
+@endcan
+
+@if(Gate::allows('update', $post))
+    <a href="/post/{{ $post->id }}/edit">Editar Post</a>
+@endif
+
+
+@can('update', $post)
+    <a href="/post/{{ $post->id }}/edit">Editar Post</a>
+@elsecan('review', $post)
+    <a href="/post/{{ $post->id }}/review">Revisar Post</a>
+@else
+    No tienes permisos :( 
+@endcan
+
+@cannot('update', $post)
+    <span class="button-disabled">Editar post</span>
+@else
+    <a href="/post/{{ $post->id }}/edit">Editar Post</a>
+@endcannot
+
+
+@can('create', App\Post::class)
+    <p><a href="#">Crear post</a></p>
+@endcan
+
+test
+
+/** @test */
+    function admins_can_update_posts()
+    {
+        //Arrange
+        $admin = $this->createAdmin();
+ 
+        $this->be($admin);
+ 
+        $post = new Post;
+ 
+        // Act
+        $result = Gate::allows('update-post', $post);
+ 
+        // Assert
+        $this->assertTrue($result);
+    }
+
+
+private function createAdmin()
+{
+    return factory(User::class)->states('admin')->create();
+}
+
+
+$factory->state(App\User::class, 'admin', function (Faker $faker) {
+    return [
+        'role' => 'admin',
+    ];
+});
+
+
+AuthServiceProvide:
+
+public function update(User $user, Post $post)
+{
+    return $user->owns($post);
+}
+
+
+/** @test */
+function authors_can_update_posts()
+{
+    $user = $this->createUser();
+ 
+    $post = factory(Post::class)->create([
+        'user_id' => $user->id,
+    ]);
+ 
+    $policy = new PostPolicy;
+    
+    $this->assertTrue(
+        $policy->update($user, $post)
+    );
+}
+
+
+<?php
+// AuthServiceProvider@boot
+Gate::define('update-post', 'App\Policies\PostPolicy@update');
+
+// Definir varias reglas con Gate resource:
+Gate::resource('post', 'PostPolicy');
+ 
+// Esto es equivalente a escribir lo siguiente:
+Gate::define('post.view', 'PostPolicy@view');
+Gate::define('post.create', 'PostPolicy@create');
+Gate::define('post.update', 'PostPolicy@update');
+Gate::define('post.delete', 'PostPolicy@delete');
+
+Gate::resource('post', PostPolicy::class, [
+    'update' => 'update',
+    'publish' => 'publish'
+]);
+
+Gate::define('post.update', 'App\Policies\PostPolicy@update');
+Gate::define('post.publish', 'App\Policies\PostPolicy@publish');
+
+
+Gate::forUser($user)->allows('update-post', $post)
+
+
+Gate::denies('update-post', $post)
+
+
+auth()->user()->can('update-post');
+ 
+User::first()->can('update-post');
+ 
+// Verificar que no tiene acceso con cannot:
+ 
+auth()->user()->cannot('update-post');
+ 
+User::first()->cannot('update-post');
+
+
+
+Definir un Gate global:
+
+
+Gate::before(function (User $user) {
+    if ($user->isAdmin()) {
+        return true;
+    }
+});
+
+
+

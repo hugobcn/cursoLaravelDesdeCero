@@ -1,0 +1,279 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/multiple_save
+https://styde.net/guardar-un-registro-en-varias-tablas-con-eloquent-y-laravel/
+https://styde.net/como-trabajar-con-form-requests-en-laravel/
+
+subir a git local:
+
+$ git init
+$ git add .                          
+$ git status
+$ git commit -m  "laravelDesde0V00
+$ clear
+------------------------------------------------
+
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+
+------------------Refresdate Test-------
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class UsersModuleTest extends TestCase {
+
+    use RefreshDatabase;
+
+--------- DB::transaction--------------
+
+Las transacciones en base de datos son un grupo de consultas SQL que se ejecutan 
+en un «ambiente controlado». Todas las consultas contenidas en una transacciones 
+se ejecutan pero el impacto de cada una de ellas se ve reflejado cuando todas 
+las consultas se ejecutaron correctamente:
+
+DB::transaction(function () {
+    DB::table('users')->update(['votes' => 1]);
+
+    DB::table('posts')->delete();
+});
+
+
+DB::beginTransaction();
+
+try {
+    DB::table('users')->update(['votes' => 1]);
+    DB::table('posts')->delete();
+
+    DB::commit();
+} catch (\Exception $e) {
+    DB::rollback();
+}
+
+
+--------------guardar-un-registro-en-varias-tablas----------------
+
+create_user_profiles mugracion
+
+Schema::create('user_profiles', function (Blueprint $table) {
+    $table->increments('id');
+    $table->string('bio', 1000)
+    $table->timestamps();
+});
+
+validate
+
+$data = request()->validate([
+    // Otras reglas... 
+    'bio' => 'required',
+    'twitter' => 'url',
+], [
+    'name.required' => 'El campo nombre es obligatorio'
+]);
+
+Schema::create('user_profiles', function (Blueprint $table) {
+    // ...
+    $table->unsignedInteger('user_id');
+    $table->foreign('user_id')->references('id')->on('users');
+});
+
+UserController
+
+DB::transaction(function () use ($data) {
+    // Lógica de Eloquent..
+});
+
+ublic function save()
+{
+    User::createUser($this->validated());
+
+}
+
+-------------------------
+
+php artisan make:request xxxxxx
+
+namespace App\Http\Requests;
+
+use App\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Http\FormRequest;
+
+class CreateUserRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'name' => 'required',
+            'email' => ['required', 'email', 'unique:users,email'],
+            'password' => 'required',
+            'bio' => 'required',
+            'twitter' => ['nullable', 'url'],
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'name.required' => 'El campo nombre es obligatorio'
+        ];
+    }
+
+    public function createUser()
+    {
+        DB::transaction(function () {
+            $data = $this->validated();
+
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => bcrypt($data['password'])
+            ]);
+
+            $user->profile()->create([
+                'bio' => $data['bio'],
+                'twitter' => $data['twitter'],
+            ]);
+        });
+    }
+}
+
+-------------------------------------------
+
+UserController:
+
+
+use App\{
+    Http\Requests\CreateUserRequest, User, UserProfile
+};
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+
+public function store(CreateUserRequest $request)
+    {
+        $request->createUser();
+
+        return redirect()->route('users.index');
+    }
+
+
+---Model UserProfile.php----
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class UserProfile extends Model
+{
+    protected $fillable = ['bio', 'twitter', 'github'];
+}
+
+
+----Model User añadir:
+
+public function profile()
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+
+-----------------Migrations UserProfile------------
+
+<?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class CreateUserProfilesTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('user_profiles', function (Blueprint $table) {
+            $table->increments('id');
+
+            $table->string('bio', 1000);
+            $table->string('twitter')->nullable();
+
+            $table->unsignedInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users');
+
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('user_profiles');
+    }
+}
+
+
+------ vista-----
+
+test:
+
+ <div class="form-group">
+                    <label for="bio">Bio:</label>
+                    <textarea name="bio" class="form-control" id="bio">{{ old('bio') }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="twitter">Twitter:</label>
+                    <input type="text" class="form-control" name="twitter" id="twitter" placeholder="https://twitter.com/Stydenet" value="{{ old('twitter') }}">
+                </div>
+
+
+--------------test--------
+
+/** @test */
+    function test_it_creates_a_new_user()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->post('/usuarios/', [
+            'name' => 'Duilio',
+            'email' => 'duilio@styde.net',
+            'password' => '123456',
+            'bio' => 'Programador de Laravel y Vue.js',
+            'twitter' => 'https://twitter.com/sileence',
+        ])->assertRedirect('usuarios');
+
+        $this->assertCredentials([
+            'name' => 'Duilio',
+            'email' => 'duilio@styde.net',
+            'password' => '123456',
+        ]);
+
+        $this->assertDatabaseHas('user_profiles', [
+            'bio' => 'Programador de Laravel y Vue.js',
+            'twitter' => 'https://twitter.com/sileence',
+            'user_id' => User::findByEmail('duilio@styde.net')->id,
+        ]);
+    }

@@ -1,0 +1,284 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/dynamic_select2
+https://styde.net/nueva-forma-de-validar-peticiones-y-obtener-datos-en-laravel-5-5/
+https://styde.net/componentes-dinamicos-para-formularios-con-blade-y-laravel/
+https://styde.net/instalacion-del-paquete-styde-html
+https://styde.net/creando-formularios-con-el-paquete-styde-html/
+
+subir a git local:
+
+$ git init
+$ git add .                          
+$ git status
+$ git commit -m  "laravelDesde0V00
+$ clear
+------------------------------------------------
+
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+
+------------------Refresdate Test-------
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class UsersModuleTest extends TestCase {
+
+    use RefreshDatabase;
+
+----------------$this->assertDatabaseEmpty('users');--------------
+
+Call to undefined method Illumuinate\Database\Query\Builder::all
+
+ NO App\Profession::orderBy('title', 'ASC')->all() // Mal
+ 
+SI App\Profession::orderBy('title', 'ASC')->get() // Bien
+
+
+Error: Call to a member function contains() on null:
+
+
+->assertViewHas('professions', function ($professions) user ($profession) {
+    return $professions->contains($profession); // Si professions no existe recibimos el error
+});
+
+
+
+
+Panel de Control
+
+En esta lección del Curso Crea un Panel de Control con Laravel agregaremos un campo de tipo select para poder seleccionar la profesión del usuario en el formulario de creación. También veremos cómo mantener el valor seleccionado en el formulario en caso de que ocurra un error de validación, moveremos el campo profession_id a la tabla user_profiles, mejoraremos nuestro UserSeeder y te presentaremos el primer desafío del curso.
+
+Repositorio
+
+Ver el código de esta lección en GitHub
+Notas
+
+Cuando recibimos el error Call to undefined method Illumuinate\Database\Query\Builder::all() esto se debe a que cada vez que modificamos las consultas debemos llamar al método get() en lugar de all():
+
+	 
+App\Profession::orderBy('title', 'ASC')->all() // Mal
+ 
+App\Profession::orderBy('title', 'ASC')->get() // Bien
+ 
+
+En nuestro caso, cuando utilizamos orderBy Laravel va a utilizar métodos mágicos para construir la consulta y al hacer esto ya no tenemos el método all() disponible.
+
+Cuando recibimos el mensaje Error: Call to a member function contains() on null Laravel nos está diciendo que estamos intentando llamar a un método en null. En nuestro caso sucede porque intentamos llamar a contains() en la variable professions que aún no hemos pasado a la vista:
+
+->assertViewHas('professions', function ($professions) user ($profession) {
+    return $professions->contains($profession); // Si professions no existe recibimos el error
+});
+
+ 
+
+Con old() puedes recuperar un valor seleccionado :
+
+<option value="{{ $profession->id }}"{{ old('profession_id') == $profession->id ? ' selected' : '' }}>
+    {{ $profession->title }}
+</option>
+
+
+-----EJEMPLO-----
+
+
+vistas:
+
+<div class="form-group">
+                    <label for="profession_id">Profesión</label>
+                    <select name="profession_id" id="profession_id" class="form-control">
+                        <option value="">Selecciona una profesión</option>
+                    @foreach($professions as $profession)  <!-- (App\Profession::orderBy('title', 'ASC')->get()) -->
+                        <option value="{{ $profession->id }}"{{ old('profession_id') == $profession->id ? ' selected' : '' }}>
+                            {{ $profession->title }}
+                        </option>
+                    @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="twitter">Twitter:</label>
+                    <input type="text" class="form-control" name="twitter" id="twitter" placeholder="https://twitter.com/Stydenet" value="{{ old('twitter') }}">
+                </div>
+
+
+usercontroller: 
+
+public function create()
+    {
+        $professions = Profession::orderBy('title', 'ASC')->get();
+
+        return view('users.create', compact('professions'));
+    }
+
+
+test:
+
+/** @test */
+    function test_it_loads_the_new_users_page()
+    {
+        $profession = factory(Profession::class)->create();
+
+        $this->get('/usuarios/nuevo')
+            ->assertStatus(200)
+            ->assertSee('Crear usuario')
+            ->assertViewHas('professions', function ($professions) use ($profession) {
+                return $professions->contains($profession);
+            });
+    }
+
+
+request:
+
+public function rules()
+    {
+        return [
+            'name' => 'required',
+            'email' => ['required', 'email', 'unique:users,email'],
+            'password' => 'required',
+            'bio' => 'required',
+            'twitter' => ['nullable', 'present', 'url'],
+            'profession_id' => [
+                'nullable', 'present',
+                Rule::exists('professions', 'id')->whereNull('deleted_at')
+            ],
+        ];
+    }
+
+
+test: 
+
+ /** @test */
+    function it_creates_a_new_user()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->post('/usuarios/', $this->getValidData())->assertRedirect('usuarios');
+
+        $this->assertCredentials([
+            'name' => 'Duilio',
+            'email' => 'duilio@styde.net',
+            'password' => '123456',
+        ]);
+
+        $this->assertDatabaseHas('user_profiles', [
+            'bio' => 'Programador de Laravel y Vue.js',
+            'twitter' => 'https://twitter.com/sileence',
+            'user_id' => User::findByEmail('duilio@styde.net')->id,
+            'profession_id' => $this->profession->id,
+        ]);
+    }
+
+
+/** @test */
+    function the_profession_id_field_is_optional()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->post('/usuarios/', $this->getValidData([
+            'profession_id' => '',
+        ]))->assertRedirect('usuarios');
+
+        $this->assertCredentials([
+            'name' => 'Duilio',
+            'email' => 'duilio@styde.net',
+            'password' => '123456',
+        ]);
+
+        $this->assertDatabaseHas('user_profiles', [
+            'bio' => 'Programador de Laravel y Vue.js',
+            'user_id' => User::findByEmail('duilio@styde.net')->id,
+            'profession_id' => null,
+        ]);
+    }
+
+
+profesion:
+
+
+ public function up()
+    {
+        Schema::create('user_profiles', function (Blueprint $table) {
+            $table->increments('id');
+
+            $table->string('bio', 1000);
+            $table->string('twitter')->nullable();
+
+            $table->unsignedInteger('profession_id')->nullable();
+            $table->foreign('profession_id')->references('id')->on('professions');
+
+            $table->unsignedInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users');
+
+            $table->timestamps();
+        });
+    }
+
+request:  
+
+public function createUser()
+    {
+        DB::transaction(function () {
+            $data = $this->validated();
+
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => bcrypt($data['password']),
+            ]);
+
+            $user->profile()->create([
+                'bio' => $data['bio'],
+                'twitter' => $data['twitter'],
+                'profession_id' => $data['profession_id'],
+            ]);
+        });
+
+
+model: 
+
+class UserProfile extends Model
+{
+    protected $fillable = ['bio', 'twitter', 'github', 'profession_id'];
+}
+
+seed: 
+
+public function run()
+    {
+        //$professions = DB::select('SELECT id FROM professions WHERE title = ?', ['Desarrollador back-end']);
+
+        $professionId = Profession::where('title', 'Desarrollador back-end')->value('id');
+
+        $user = factory(User::class)->create([
+            'name' => 'Duilio Palacios',
+            'email' => 'duilio@styde.net',
+            'password' => bcrypt('laravel'),
+            'is_admin' => true,
+        ]);
+
+        $user->profile()->create([
+            'bio' => 'Programador, profesor, editor, escritor, social media manager',
+            'profession_id' => $professionId,
+        ]);
+
+        factory(User::class, 29)->create()->each(function ($user) {
+            $user->profile()->create(
+                factory(\App\UserProfile::class)->raw()
+            );
+        });
+    }
+}
+
+
+factory:
+
+use Faker\Generator as Faker;
+
+$factory->define(App\UserProfile::class, function (Faker $faker) {
+    return [
+        'bio' => $faker->paragraph,
+    ];
+});

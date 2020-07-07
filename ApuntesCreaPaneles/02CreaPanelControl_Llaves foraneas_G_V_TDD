@@ -1,0 +1,389 @@
+https://github.com/StydeNet/curso-de-laravel-desde-cero
+https://github.com/StydeNet/curso-de-laravel-desde-cero/tree/dynamic_select
+https://styde.net/como-trabajar-con-form-requests-en-laravel/
+https://styde.net/metodos-personalizados-para-pruebas-automatizadas-a-la-base-de-datos-con-laravel/
+
+subir a git local:
+
+$ git init
+$ git add .                          
+$ git status
+$ git commit -m  "laravelDesde0V00
+$ clear
+------------------------------------------------
+
+cd /var/www/hugo/stydePHP/LaravelDesde0/laravel-desde0
+alias t=vendor/bin/phpunit
+/** @test */
+/storage/logs/laravel.logs
+DB_DATABASE=laravelDesde0Test
+phpunit.xml: <env name="DB_DATABASE" value="laravelDesde0Test"/>
+
+------------------Refresdate Test-------
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class UsersModuleTest extends TestCase {
+
+    use RefreshDatabase;
+
+----------------$this->assertDatabaseEmpty('users');--------------
+
+public function rules()
+{
+    return [
+        // ...
+        'profession_id' => Rule::exists('professions', 'id')->where('selectable', true),
+    ;
+}
+
+soft delete es probable que quieras que sólo las profesiones que no estén eliminadas :
+
+
+public function rules()
+{
+    return [
+        // ...
+        profession_id' => Rule::exists('professions', 'id')->whereNull('deleted_at'),
+    ];
+}
+
+------------------------------
+
+REQUEST
+
+Undefined index error:
+
+DB:trasnsxction( ...
+$data = $this->validated();
+ rules(
+'profesional'=> ''
+
+creentiasl is not valid:
+
+Modelo  fillable  [,profesional_id,]
+
+index invalidated:
+test:
+
+createrUser
+
+'profesional_id' => $data['profesional_id'] ? null;
+
+--- enviar error en test---
+
+$this->withExceptionHandLing(); or //$this->handleValidationExceptions();
+        //withoutExceptionHandLing();
+        //$this->handleValidationExceptions();
+
+
+---ejemplo  no  slectable----
+
+UserNoduleTest
+
+protected $profession;
+
+protected function getValidData(array $custom = [])
+    {
+        $this->profession = factory(Profession::class)->create();
+
+        return array_filter(array_merge([
+            'name' => 'Duilio',
+            'email' => 'duilio@styde.net',
+            'password' => '123456',
+            //'profession_id' => factory(Profession::class)->create()->id,
+            'profession_id' => $this->profession->id,
+            'bio' => 'Programador de Laravel y Vue.js',
+            'twitter' => 'https://twitter.com/sileence',
+        ], $custom));
+}
+ 
+
+/** @test */
+    function test_it_creates_a_new_user()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->post('/usuarios/', $this->getValidData())->assertRedirect('usuarios');
+
+        $this->assertCredentials([
+            'name' => 'Duilio',
+            'email' => 'duilio@styde.net',
+            'password' => '123456',
+            'profession_id' => $this->profession->id,
+        ]);
+
+        $this->assertDatabaseHas('user_profiles', [
+            'bio' => 'Programador de Laravel y Vue.js',
+            'twitter' => 'https://twitter.com/sileence',
+            'user_id' => User::findByEmail('duilio@styde.net')->id,
+        ]);
+    }
+
+userController:
+
+public function store(CreateUserRequest $request)
+    {
+        $request->createUser();
+
+        return redirect()->route('users.index');
+    }
+
+
+
+userRequest:
+
+public function rules()
+    {
+        return [
+            'name' => 'required',
+            'email' => ['required', 'email', 'unique:users,email'],
+            'password' => 'required',
+            'bio' => 'required',
+            'twitter' => ['nullable', 'url'],
+            'profession_id' => '',
+        ];
+    }
+
+
+public function createUser()
+    {
+        DB::transaction(function () {
+            $data = $this->validated();
+
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => bcrypt($data['password']),
+                'profession_id' => $data['profession_id'],
+            ]);
+
+            $user->profile()->create([
+                'bio' => $data['bio'],
+                'twitter' => $data['twitter'] ?? null,
+            ]);
+        });
+    }
+
+
+user:
+
+protected $fillable = [
+        'name', 'email', 'password', 'profession_id',
+    ];
+
+
+test:
+
+/** @test */
+    function test_the_profession_id_field_is_optional()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->post('/usuarios/', $this->getValidData([
+            'profession_id' => null,
+        ]))->assertRedirect('usuarios');
+
+        $this->assertCredentials([
+            'name' => 'Duilio',
+            'email' => 'duilio@styde.net',
+            'password' => '123456',
+            'profession_id' => null,
+        ]);
+
+        $this->assertDatabaseHas('user_profiles', [
+            'bio' => 'Programador de Laravel y Vue.js',
+            'user_id' => User::findByEmail('duilio@styde.net')->id,
+        ]);
+    }
+
+
+Request:
+
+public function createUser()
+    {
+        DB::transaction(function () {
+            $data = $this->validated();
+
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => bcrypt($data['password']),
+                'profession_id' => $data['profession_id'] ?? null,
+            ]);
+
+            $user->profile()->create([
+                'bio' => $data['bio'],
+                'twitter' => $data['twitter'] ?? null,
+            ]);
+        });
+    }
+
+test:
+
+ /** @test */
+    function test_the_profession_must_be_valid()
+    {
+
+        withoutExceptionHandLing();
+        //$this->handleValidationExceptions();
+
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/', $this->getValidData([
+                'profession_id' => '999'
+            ]))
+            ->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors(['profession_id']);
+
+        $this->assertDatabaseEmpty('users');
+    }
+error 500:
+userRequest:
+
+public function rules()
+    {
+        return [
+            'name' => 'required',
+            'email' => ['required', 'email', 'unique:users,email'],
+            'password' => 'required',
+            'bio' => 'required',
+            'twitter' => ['nullable', 'url'],
+            'profession_id' => 'exists:professions,id',
+        ];
+    }
+
+error no giben data:
+
+ /** @test */
+    function test_the_profession_must_be_valid()
+    {
+
+        $this->withExceptionHandLing(); or //$this->handleValidationExceptions();
+        //withoutExceptionHandLing();
+        //$this->handleValidationExceptions();
+
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/', $this->getValidData([
+                'profession_id' => '999'
+            ]))
+            ->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors(['profession_id']);
+
+        $this->assertDatabaseEmpty('users');
+    }
+
+
+--ejemplo   slectable----
+
+
+-----migration-----------
+
+public function up()
+    {
+        Schema::create('professions', function (Blueprint $table) {
+            $table->increments('id');
+
+            $table->string('title', 100)->unique();
+            $table->boolean('selectable')->default('true');
+            //$table->boolean('active');
+
+
+            $table->timestamps();
+            //$table->softDeletes();
+        });
+    }
+
+
+test:
+
+ /** @test */
+    function only_not_deleted_professions_can_be_selected()
+    {
+       $nonSelectableProfession = factory(Profession::class)->create([
+            'selectable'=> false,
+]);
+
+        $this->handleValidationExceptions();
+
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/', $this->getValidData([
+                'profession_id' => $nonSelectableProfession->id,
+            ]))
+            ->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors(['profession_id']);
+
+        $this->assertDatabaseEmpty('users');
+    }
+
+Request:
+
+public function rules()
+    {
+        return [
+            'name' => 'required',
+            'email' => ['required', 'email', 'unique:users,email'],
+            'password' => 'required',
+            'bio' => 'required',
+            'twitter' => ['nullable', 'url'],
+            'profession_id' => Rule::exists('professions', 'id')->where('selected',true),
+        ];
+    }
+
+
+----------------SOFT  DELETE-----------
+
+
+/** @test */
+    function only_not_deleted_professions_can_be_selected()
+    {
+        $deletedProfession = factory(Profession::class)->create([
+            'deleted_at' => now()->format('Y-m-d'),
+        ]);
+
+        $this->handleValidationExceptions();
+
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/', $this->getValidData([
+                'profession_id' => $deletedProfession->id,
+            ]))
+            ->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors(['profession_id']);
+
+        $this->assertDatabaseEmpty('users');
+    }
+
+
+BluePrint.php:
+
+
+public function softDeletes($column = 'delete_at', $precision = 0)
+{
+    return $this->timestamp($column, $precision)-> nullable();
+}
+
+
+migration:
+
+public function up()
+    {
+        Schema::create('professions', function (Blueprint $table) {
+            $table->increments('id');
+
+            $table->string('title', 100)->unique();
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
+
+
+public function rules()
+    {
+        return [
+            'name' => 'required',
+            'email' => ['required', 'email', 'unique:users,email'],
+            'password' => 'required',
+            'bio' => 'required',
+            'twitter' => ['nullable', 'url'],
+            'profession_id' => Rule::exists('professions', 'id')->whereNull('deleted_at'),
+        ];
+    }
